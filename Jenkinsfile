@@ -121,7 +121,7 @@ controller:
 curl -s -X GET \\
 -H "Accept: application/vnd.github+json" \\
 -H "X-GitHub-Api-Version: 2022-11-28" \\
--H 'Authorization: Bearer ${githubToken}' https://api.github.com/repos/${githubRepo}/contents/${filePath}?ref=deployment | jq -r '.sha'
+-H 'Authorization: Bearer ${githubToken}' https://api.github.com/repos/${githubRepo}/contents/${filePath} | jq -r '.sha'
 """, returnStdout: true)
 
                     def sha = shaOutput.trim() // 가져온 출력의 앞뒤 공백을 제거하고 저장
@@ -143,7 +143,7 @@ curl -L \\
 -X PUT \\
 -H "Accept: application/vnd.github+json" \\
 -H "X-GitHub-Api-Version: 2022-11-28" \\
--H 'Authorization: Bearer ${githubToken}' https://api.github.com/repos/${githubRepo}/contents/${filePath}?ref=deployment \\
+-H 'Authorization: Bearer ${githubToken}' https://api.github.com/repos/${githubRepo}/contents/${filePath} \\
 -d '{"message": "Chore: Update image tag to ${env.IMAGE_TAG} by Jenkins","content": "${base64Contents}","branch": "deployment","sha": "$sha"}'
 """, returnStatus: true)
 
