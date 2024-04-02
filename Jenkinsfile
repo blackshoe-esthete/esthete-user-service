@@ -92,7 +92,7 @@ pipeline {
                 script {
                     def githubToken = env.GITHUB_TOKEN
 
-                    def githubRepo = 'dgu-web-t3-blackshoe/esthete-gitops'
+                    def githubRepo = 'blackshoe-esthete/esthete-gitops'
 
                     def filePath = 'esthete-charts/esthete-user-chart/values.yaml'
 
