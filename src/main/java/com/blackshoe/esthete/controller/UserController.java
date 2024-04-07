@@ -1,24 +1,17 @@
 package com.blackshoe.esthete.controller;
 
-import aj.org.objectweb.asm.TypeReference;
 import com.blackshoe.esthete.dto.ResponseDto;
 import com.blackshoe.esthete.dto.SignUpDto;
 import com.blackshoe.esthete.exception.UserErrorResult;
 import com.blackshoe.esthete.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
