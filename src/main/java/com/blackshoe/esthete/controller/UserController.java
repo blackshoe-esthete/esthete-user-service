@@ -241,5 +241,11 @@ public class UserController {
         return cookie;
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout() {
+        // logout logic implemented by logoutFilter
+        return ResponseEntity.ok("Logged out successfully");
+    }
+
 
 }
