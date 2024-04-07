@@ -2,6 +2,7 @@ package com.blackshoe.esthete.controller;
 
 import com.blackshoe.esthete.dto.ResponseDto;
 import com.blackshoe.esthete.dto.SignUpDto;
+import com.blackshoe.esthete.dto.LoginDto;
 import com.blackshoe.esthete.exception.UserErrorResult;
 import com.blackshoe.esthete.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -97,13 +98,19 @@ public class UserController {
                     .payload(objectMapper.convertValue(signUpCompletionResponseDto, Map.class))
                     .build();
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
-        }catch (Exception e){
+        }catch (Exception e) {
             System.out.println("회원가입이 정상적으로 진행되지 않음");
             ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
         }
 
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto.ESTLoginRequestDto requestDto) {
+        // 로그인 로직 수행
+        return ResponseEntity.ok("Login successful");
     }
 
 

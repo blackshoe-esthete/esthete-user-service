@@ -1,8 +1,14 @@
 package com.blackshoe.esthete.config;
 
+//import com.blackshoe.esthete.jwt.CustomJsonUsernamePasswordAuthFilter;
+import com.blackshoe.esthete.jwt.CustomJsonUsernamePasswordAuthFilter;
+import com.blackshoe.esthete.jwt.CustomLogoutFilter;
+import com.blackshoe.esthete.jwt.JWTFilter;
+import com.blackshoe.esthete.jwt.JWTUtil;
+//import com.blackshoe.esthete.jwt.LoginFilter;
+import com.blackshoe.esthete.service.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,13 +29,19 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
-
+    private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
+    private final RedisUtil redisUtil;
 
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, ObjectMapper objectMapper, RedisUtil redisUtil){
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtil = jwtUtil;
+        this.objectMapper = objectMapper;
+        this.redisUtil = redisUtil;
+    }
 
     //AuthenticationManager Bean 등록
     @Bean
@@ -99,8 +111,27 @@ public class SecurityConfig {
 //
 //        http.addFilterAt(new CustomJsonUsernamePasswordAuthFilter(objectMapper, jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
+        http.addFilterBefore(new JWTFilter(jwtUtil), CustomJsonUsernamePasswordAuthFilter.class); //로그인 전에 JWT token을 검증하는 과정
+        http.addFilterAt(getAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, redisUtil), LogoutFilter.class);
+
+        http.sessionManagement((session) -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
 
+    }
+
+    protected CustomJsonUsernamePasswordAuthFilter getAuthenticationFilter(){
+        CustomJsonUsernamePasswordAuthFilter authFilter = new CustomJsonUsernamePasswordAuthFilter(objectMapper, jwtUtil, redisUtil);
+        try{
+            authFilter.setFilterProcessesUrl("/login");
+            authFilter.setAuthenticationManager(this.authenticationManager(authenticationConfiguration));
+//            authFilter.setUsernameParameter("email");
+//            authFilter.setPasswordParameter("password");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return authFilter;
     }
 }
