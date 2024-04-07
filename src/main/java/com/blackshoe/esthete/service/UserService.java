@@ -1,5 +1,6 @@
 package com.blackshoe.esthete.service;
 
+import com.blackshoe.esthete.dto.OAuth2Dto;
 import com.blackshoe.esthete.dto.SignUpDto;
 import com.blackshoe.esthete.entity.Gender;
 import com.blackshoe.esthete.entity.Role;
@@ -69,5 +70,49 @@ public class UserService {
             return false;
         }
     }
+
+    public OAuth2Dto.OAuth2ResponseDto socialLogin(OAuth2Dto.OAuth2RequestDto requestDto){
+        String socialId = requestDto.getEmail();
+        System.out.println("socialId : "+ socialId);
+        String socialProvider = requestDto.getProvider();
+        System.out.println("socialProvider : "+ socialProvider);
+
+        //기존 회원인지 판단
+        User user = userRepository.findByEmail(socialId);
+
+        if(user == null){
+            System.out.println("처음 로그인한 회원임으로 회원가입을 진행합니다. ");
+            User newUser = User.builder()
+                    .uuid(UUID.randomUUID())
+                    .provider(requestDto.getProvider())
+                    .nickname(requestDto.getNickname())
+                    .email(requestDto.getEmail())
+                    .role(Role.USER)
+                    .gender(requestDto.getGender())
+                    .birthday(requestDto.getBirthday())
+                    .build();
+
+            User socialUser = userRepository.save(newUser);
+
+            return OAuth2Dto.OAuth2ResponseDto.builder()
+                    .userId(socialUser.getUuid())
+                    .provider(socialUser.getProvider())
+                    .createdAt(socialUser.getCreatedAt())
+                    .build();
+        }
+        else{
+            System.out.println("기존에 존재하는 회원입니다. 정보를 업데이트 합니다.");
+            user.updateUserInfo(requestDto.getNickname(), requestDto.getGender(), requestDto.getBirthday());
+            User socialUser = userRepository.save(user);
+
+            return OAuth2Dto.OAuth2ResponseDto.builder()
+                    .userId(socialUser.getUuid())
+                    .provider(socialUser.getProvider())
+                    .updatedAt(socialUser.getUpdatedAt())
+                    .build();
+        }
+
+    }
+
 
 }
