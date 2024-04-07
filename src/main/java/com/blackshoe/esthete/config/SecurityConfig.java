@@ -96,8 +96,8 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers(SWAGGER_URI).permitAll()
-                .requestMatchers("/login", "/", "users/signup/next", "users/signup/completion"
-                        ,"/users/signup/email/validation", "/users/signup/email/verification"
+                .requestMatchers("/login", "/", "/signup/next", "/signup/completion"
+                        ,"/signup/email/validation", "/signup/email/verification"
                         , "/reissue","/social-login").permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
