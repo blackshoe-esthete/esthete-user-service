@@ -20,7 +20,7 @@ spring:
       password:
       database: 1
   jwt:
-    secret: fleogpvmzzalstkfkdgodyroqkfwkdbalroqkfwkdbalajekfitospldvnewfekdl
+    secret: ${JWT_SECRET}
 
 #springdoc:
 #  show-login-endpoint: true
