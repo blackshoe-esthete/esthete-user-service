@@ -21,5 +21,15 @@ public class EmailController {
         return mailService.joinEmail(emailDto.getEmail());
     }
 
+    @PostMapping("/verification")
+    public String AuthCheck(@RequestBody @Valid EmailDto.EmailCheckDto emailCheckDto){
+        Boolean Checked=mailService.CheckAuthNum(emailCheckDto.getEmail(),emailCheckDto.getAuthNum());
+        if(Checked){
+            return "인증 성공";
+        }
+        else{
+            throw new NullPointerException("유효하지 않은 인증번호입니다.");
+        }
+    }
 }
 
