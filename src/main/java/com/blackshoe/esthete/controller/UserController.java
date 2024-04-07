@@ -81,5 +81,37 @@ public class UserController {
         }
     }
 
+    @PostMapping("/signup/completion")
+    public ResponseEntity<ResponseDto> joinUser(@RequestBody SignUpDto.ESTSignUpCompletionRequestDto requestDto){
+        try{
+            if(requestDto.getNickname() == null || requestDto.getGender() == null || requestDto.getBirthday() == null){
+                System.out.println("회원정보가 누락되었습니다.");
+                UserErrorResult userErrorResult = UserErrorResult.REQUIRED_VALUE;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            if (!userService.isValidDate(requestDto.getBirthday())) {
+                System.out.println("올바르지 않은 생년월일 형식");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_BIRTHDAY;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            SignUpDto.ESTSignUpCompletionResponseDto signUpCompletionResponseDto = userService.joinUserCompletion(requestDto);
+            ResponseDto responseDto = ResponseDto.builder()
+                    .payload(objectMapper.convertValue(signUpCompletionResponseDto, Map.class))
+                    .build();
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+        }catch (Exception e){
+            System.out.println("회원가입이 정상적으로 진행되지 않음");
+            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
+        }
+
+    }
+
 
 }
