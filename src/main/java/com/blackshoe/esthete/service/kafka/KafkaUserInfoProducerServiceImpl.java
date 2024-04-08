@@ -22,12 +22,13 @@ public class KafkaUserInfoProducerServiceImpl implements KafkaUserInfoProducerSe
 
         String userJsonString;
         try{
+            //직렬화
             userJsonString = objectMapper.writeValueAsString(userInfo);
         } catch (JsonProcessingException e) {
             log.error("Error while converting user object to json string", e);
             throw new RuntimeException("Error while converting user object to json string", e);
         }
 
-        kafkaProducer.send("user-info", userInfo.toString());
+        kafkaProducer.send(topic, userJsonString);
     }
 }

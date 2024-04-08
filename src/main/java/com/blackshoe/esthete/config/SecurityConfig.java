@@ -98,7 +98,7 @@ public class SecurityConfig {
                 .requestMatchers(SWAGGER_URI).permitAll()
                 .requestMatchers("/login", "/", "/signup/next", "/signup/completion"
                         ,"/signup/email/validation", "/signup/email/verification"
-                        , "/reissue","/social-login").permitAll()
+                        , "/reissue","/social-login", "/test/kafka").permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
 //        //JWTFilter 등록
