@@ -287,8 +287,24 @@ public class UserController {
     @PutMapping("/id/check")
     public ResponseEntity<?> checkUserId(@RequestBody LoginDto.FindIDRequestDto requestDto) {
         try{
+            if (requestDto.getEmail() == null) {
+                System.out.println("이메일이 누락되었습니다.");
+                UserErrorResult userErrorResult = UserErrorResult.REQUIRED_VALUE;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            if (!requestDto.getEmail().matches(emailRegex)) {
+                System.out.println("이메일 형식이 아닙니다");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_EMAIL;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
             userService.checkUserId(requestDto);
             return ResponseEntity.status(HttpStatus.OK).body("가입되어 있는 이메일입니다.");
+
         }catch (Exception e){
             ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
@@ -298,6 +314,29 @@ public class UserController {
     @PutMapping("/password/reset")
     public ResponseEntity<ResponseDto> resetPassword(@RequestBody LoginDto.FindPasswordRequestDto requestDto) {
         try{
+            if (requestDto.getEmail() == null || requestDto.getNewPassword() == null) {
+                System.out.println("필수값이 누락되었습니다.");
+                UserErrorResult userErrorResult = UserErrorResult.REQUIRED_VALUE;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            if (!requestDto.getEmail().matches(emailRegex)) {
+                System.out.println("이메일 형식이 아닙니다");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_EMAIL;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            if (!requestDto.getNewPassword().matches(passwordRegex)) {
+                System.out.println("유효하지 않은 비밀번호입니다.");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_PASSWORD;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
             LoginDto.FindPasswordResponseDto findPasswordResponseDto = userService.resetPassword(requestDto);
             ResponseDto responseDto = ResponseDto.builder()
                     .payload(objectMapper.convertValue(findPasswordResponseDto, Map.class))
