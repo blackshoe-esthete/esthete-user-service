@@ -91,6 +91,10 @@ public class User {
         this.birthday = birthday;
     }
 
+    public void updatePassword(String password){
+        this.password = password;
+    }
+
 
 
 }

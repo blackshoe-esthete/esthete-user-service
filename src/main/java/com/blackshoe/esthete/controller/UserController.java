@@ -283,18 +283,31 @@ public class UserController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
-//    @GetMapping("/login/password/check")
-//    public ResponseEntity<?> checkUserId(@RequestBody LoginDto.FindIDRequestDto requestDto) {
-//        if(userService.checkUserId(requestDto.getEmail())){
-//            return ResponseEntity.status(HttpStatus.OK).body("가입되어 있는 이메일입니다.");
-//        }
-//        else{
-//            return ResponseEntity.status(HttpStatus.OK).body(UserErrorResult.NOT_FOUND_USER.getMessage());
+
+    @PutMapping("/id/check")
+    public ResponseEntity<?> checkUserId(@RequestBody LoginDto.FindIDRequestDto requestDto) {
+        try{
+            userService.checkUserId(requestDto);
+            return ResponseEntity.status(HttpStatus.OK).body("가입되어 있는 이메일입니다.");
+        }catch (Exception e){
+            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
+        }
+    }
+
+//    @PutMapping("/password/reset")
+//    public ResponseEntity<ResponseDto> resetPassword(@RequestBody LoginDto.FindPasswordRequestDto requestDto) {
+//        try{
+//            LoginDto.FindPasswordResponseDto findPasswordResponseDto = userService.resetPassword(requestDto);
+//            ResponseDto responseDto = ResponseDto.builder()
+//                    .payload(objectMapper.convertValue(findPasswordResponseDto, Map.class))
+//                    .build();
+//            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+//        }catch (Exception e){
+//            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
 //        }
 //    }
-
-
-
 
 
 }
