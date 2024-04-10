@@ -21,18 +21,6 @@ public class LoginDto {
         private String password;
     }
 
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class ESTLoginResponseDto{
-        private UUID userId;
-        private String accessToken;
-        private String refreshToken;
-        private LocalDateTime createdAt;
-    }
 
     @Getter
     @Builder
@@ -41,8 +29,7 @@ public class LoginDto {
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class FindIDRequestDto{
-        private String phone;
-        private String verificationCode;
+        private String email;
     }
 
     @Getter

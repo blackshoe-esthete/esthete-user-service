@@ -14,7 +14,14 @@ public enum UserErrorResult {
     INVALID_NICKNAME(HttpStatus.UNPROCESSABLE_ENTITY, "유효하지 않은 닉네임(10자리 이상이거나, 특수문자 포함)입니다."),
     DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다."), //409
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."), //409
-    INVALID_BIRTHDAY(HttpStatus.UNPROCESSABLE_ENTITY, "유효하지 않은 생년월일(yyyy-MM-dd)입니다.");
+    INVALID_BIRTHDAY(HttpStatus.UNPROCESSABLE_ENTITY, "유효하지 않은 생년월일(yyyy-MM-dd)입니다."),
+    INVALID_PROVIDER(HttpStatus.UNPROCESSABLE_ENTITY, "유효하지 않은 Social Provider입니다."),
+    INVALID_GENDER(HttpStatus.UNPROCESSABLE_ENTITY, "유효하지 않은 성별(MALE, FEMALE)입니다."),
+    NOT_FOUND_JWT(HttpStatus.UNAUTHORIZED, "존재하지 않는 JWT입니다."), //401
+    EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "만료된 JWT입니다."),
+    INVALID_JWT(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT입니다."),
+    INVALID_AUTH_NUM(HttpStatus.UNPROCESSABLE_ENTITY, "유효하지 않은 인증번호입니다.");
+
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -15,13 +15,11 @@ public class EmailConfig {
     @Value("${MAIL_PASSWORD}")
     private String password;
 
-    @Value("${MAIL_HOST}")
-    private String host;
     @Bean
     public JavaMailSender mailSender() {
 
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(host);
+        mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);// 587로 포트를 지정
         mailSender.setUsername(username);
         mailSender.setPassword(password);

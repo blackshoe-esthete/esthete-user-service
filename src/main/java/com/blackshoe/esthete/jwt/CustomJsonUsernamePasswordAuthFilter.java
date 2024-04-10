@@ -9,6 +9,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -24,17 +25,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class CustomJsonUsernamePasswordAuthFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
 
     private final RedisUtil redisUtil;
 
-    public CustomJsonUsernamePasswordAuthFilter(ObjectMapper objectMapper, JWTUtil jwtUtil, RedisUtil redisUtil) {
-        this.objectMapper = objectMapper;
-        this.jwtUtil = jwtUtil;
-        this.redisUtil = redisUtil;
-    }
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         UsernamePasswordAuthenticationToken authenticationToken;

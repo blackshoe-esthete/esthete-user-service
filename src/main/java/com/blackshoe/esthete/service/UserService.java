@@ -115,4 +115,7 @@ public class UserService {
     }
 
 
+    public boolean checkUserId(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }

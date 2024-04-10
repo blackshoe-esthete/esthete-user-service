@@ -70,11 +70,9 @@ public class EmailSendService {
             helper.setText(content,true);
             mailSender.send(message);
         } catch (MessagingException e) {
-
             e.printStackTrace();
         }
         redisUtil.setDataExpire(Integer.toString(authNumber),toMail,60*5L);
-
     }
 
 }
