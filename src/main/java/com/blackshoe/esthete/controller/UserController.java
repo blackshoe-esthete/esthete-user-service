@@ -295,19 +295,19 @@ public class UserController {
         }
     }
 
-//    @PutMapping("/password/reset")
-//    public ResponseEntity<ResponseDto> resetPassword(@RequestBody LoginDto.FindPasswordRequestDto requestDto) {
-//        try{
-//            LoginDto.FindPasswordResponseDto findPasswordResponseDto = userService.resetPassword(requestDto);
-//            ResponseDto responseDto = ResponseDto.builder()
-//                    .payload(objectMapper.convertValue(findPasswordResponseDto, Map.class))
-//                    .build();
-//            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-//        }catch (Exception e){
-//            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
-//        }
-//    }
+    @PutMapping("/password/reset")
+    public ResponseEntity<ResponseDto> resetPassword(@RequestBody LoginDto.FindPasswordRequestDto requestDto) {
+        try{
+            LoginDto.FindPasswordResponseDto findPasswordResponseDto = userService.resetPassword(requestDto);
+            ResponseDto responseDto = ResponseDto.builder()
+                    .payload(objectMapper.convertValue(findPasswordResponseDto, Map.class))
+                    .build();
+            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        }catch (Exception e){
+            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
+        }
+    }
 
 
 }
