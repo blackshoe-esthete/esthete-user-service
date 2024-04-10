@@ -3,14 +3,13 @@ package com.blackshoe.esthete.jwt;//package com.blackshoe.esthete.jwt;
 
 import com.blackshoe.esthete.dto.CustomUserDetails;
 import com.blackshoe.esthete.dto.LoginDto;
-import com.blackshoe.esthete.service.RedisUtil;
+import com.blackshoe.esthete.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,31 +30,8 @@ public class CustomJsonUsernamePasswordAuthFilter extends UsernamePasswordAuthen
     private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
 
-    private final RedisUtil redisUtil;
+    private final RedisService redisUtil;
 
-//    @Override
-//    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-//        UsernamePasswordAuthenticationToken authenticationToken;
-//        if(request.getContentType().equals(MimeTypeUtils.APPLICATION_JSON_VALUE)){
-//            try{
-//                LoginDto.ESTLoginRequestDto requestDto = objectMapper.readValue(request.getReader().lines().collect(Collectors.joining()), LoginDto.ESTLoginRequestDto.class);
-//                System.out.println(requestDto.getUsername());
-//                authenticationToken = new UsernamePasswordAuthenticationToken(requestDto.getUsername(), requestDto.getPassword());
-//                System.out.println("JSON 변환 된 거 같은, try문");
-//            }catch (IOException e) {
-//                //e.printStackTrace();
-//                throw new AuthenticationServiceException("Failed to read JSON request body", e);
-//            }
-//        }else{//form-request
-//            String username = obtainUsername(request);
-//            System.out.println("LoginFilter : "+username);
-//            String password = obtainPassword(request);
-//            System.out.println("LoginFilter : "+password);
-//            authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-//        }
-//        this.setDetails(request, authenticationToken);
-//        return this.getAuthenticationManager().authenticate(authenticationToken);
-//    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {

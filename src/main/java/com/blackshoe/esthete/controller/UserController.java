@@ -7,11 +7,10 @@ import com.blackshoe.esthete.dto.LoginDto;
 import com.blackshoe.esthete.entity.Gender;
 import com.blackshoe.esthete.exception.UserErrorResult;
 import com.blackshoe.esthete.jwt.JWTUtil;
-import com.blackshoe.esthete.oauth2.SecurityService;
-import com.blackshoe.esthete.service.RedisUtil;
+import com.blackshoe.esthete.service.RedisService;
+import com.blackshoe.esthete.service.SecurityService;
 import com.blackshoe.esthete.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,7 +30,7 @@ public class UserController {
     private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
     private  final SecurityService securityService;
-    private final RedisUtil redisUtil;
+    private final RedisService redisUtil;
     private String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
     private String passwordRegex = "^(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,20}$";
 
@@ -96,7 +95,7 @@ public class UserController {
                 return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
             }
 
-            if (requestDto.getGender().equals(Gender.MALE) || requestDto.getGender().equals(Gender.FEMALE)) {
+            if (requestDto.getGender() != Gender.MALE && requestDto.getGender() != Gender.FEMALE) {
                 System.out.println("성별은 MALE과 FEMALE만 받을 수 있습니다.");
                 UserErrorResult userErrorResult = UserErrorResult.INVALID_GENDER;
                 ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
@@ -205,14 +204,6 @@ public class UserController {
                 return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
             }
 
-//            //expired check
-//            try {
-//                jwtUtil.isExpired(refresh);
-//            } catch (ExpiredJwtException e) {
-//
-//                //response status code
-//                return new ResponseEntity<>("refresh token expired", HttpStatus.BAD_REQUEST);
-//            }
             //expired check
             if(jwtUtil.isExpired(refresh)){
                 System.out.println("Refresh 토큰이 만료되었습니다.");

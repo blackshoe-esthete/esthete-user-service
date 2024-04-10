@@ -6,7 +6,7 @@ import com.blackshoe.esthete.jwt.CustomLogoutFilter;
 import com.blackshoe.esthete.jwt.JWTFilter;
 import com.blackshoe.esthete.jwt.JWTUtil;
 //import com.blackshoe.esthete.jwt.LoginFilter;
-import com.blackshoe.esthete.service.RedisUtil;
+import com.blackshoe.esthete.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +32,12 @@ import java.util.Collections;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
+
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
-    private final RedisUtil redisUtil;
+    private final RedisService redisUtil;
 
-    //AuthenticationManager Bean 등록
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws  Exception{
         return configuration.getAuthenticationManager();
@@ -60,7 +59,6 @@ public class SecurityConfig {
                 "/swagger-resources/**"
         };
 
-        //로그인 단에서 발생하는 cors 문제 해결 방법
         http.cors((corCustomizer -> corCustomizer.configurationSource(new CorsConfigurationSource() {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -96,15 +94,6 @@ public class SecurityConfig {
                         , "/reissue","/social-login", "/id/check", "/password/reset").permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
-//        //JWTFilter 등록
-//        http.addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class); //로그인 전에 JWT token을 검증하는 과정
-//
-//        //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
-//        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, objectMapper), UsernamePasswordAuthenticationFilter.class);
-
-//        http.addFilterBefore(new JWTFilter(jwtUtil), CustomJsonUsernamePasswordAuthFilter.class); //로그인 전에 JWT token을 검증하는 과정
-//
-//        http.addFilterAt(new CustomJsonUsernamePasswordAuthFilter(objectMapper, jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         http.addFilterBefore(new JWTFilter(jwtUtil), CustomJsonUsernamePasswordAuthFilter.class); //로그인 전에 JWT token을 검증하는 과정
         http.addFilterAt(getAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -122,8 +111,6 @@ public class SecurityConfig {
         try{
             authFilter.setFilterProcessesUrl("/login");
             authFilter.setAuthenticationManager(this.authenticationManager(authenticationConfiguration));
-//            authFilter.setUsernameParameter("email");
-//            authFilter.setPasswordParameter("password");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

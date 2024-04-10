@@ -54,16 +54,6 @@ public class EmailController {
 
     }
 
-//    @PostMapping("/verification")
-//    public String AuthCheck(@RequestBody @Valid EmailDto.EmailCheckDto requestDto){
-//        Boolean Checked=mailService.CheckAuthNum(requestDto.getEmail(),requestDto.getAuthNum());
-//        if(Checked){
-//            return "인증 성공";
-//        }
-//        else{
-//            throw new NullPointerException("유효하지 않은 인증번호입니다.");
-//        }
-//    }
     @PostMapping("/verification")
     public ResponseEntity<?> AuthCheck(@RequestBody @Valid EmailDto.EmailCheckDto requestDto){
         if (requestDto.getEmail() == null || requestDto.getAuthNum() == null) {

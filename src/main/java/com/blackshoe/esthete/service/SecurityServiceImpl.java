@@ -1,17 +1,13 @@
-package com.blackshoe.esthete.oauth2;
+package com.blackshoe.esthete.service;
 
 import com.blackshoe.esthete.dto.CustomUserDetails;
 import com.blackshoe.esthete.dto.OAuth2Dto;
 import com.blackshoe.esthete.entity.User;
-import com.blackshoe.esthete.exception.TokenErrorResult;
-import com.blackshoe.esthete.exception.TokenException;
 import com.blackshoe.esthete.exception.UserErrorResult;
 import com.blackshoe.esthete.exception.UserException;
 import com.blackshoe.esthete.jwt.JWTUtil;
 import com.blackshoe.esthete.repository.UserRepository;
-import com.blackshoe.esthete.service.RedisUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -25,10 +21,10 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class SecurityService {
+public class SecurityServiceImpl implements SecurityService{
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
-    private final RedisUtil redisUtil;
+    private final RedisService redisUtil;
 
 
     public Map<String, String> saveUserInSecurityContext(OAuth2Dto.OAuth2RequestDto requestDto) {
@@ -37,7 +33,7 @@ public class SecurityService {
         return saveUserInSecurityContext(socialId, socialProvider);
     }
 
-    private Map<String, String> saveUserInSecurityContext(String socialId, String socialProvider) { //jwt 발급
+    public Map<String, String> saveUserInSecurityContext(String socialId, String socialProvider) { //jwt 발급
         UserDetails userDetails = loadUserBySocialIdAndSocialProvider(socialId, socialProvider); //ori
 
         String username = userDetails.getUsername();
@@ -68,14 +64,8 @@ public class SecurityService {
         return tokens;
     }
 
-    private UserDetails loadUserBySocialIdAndSocialProvider(String socialId, String socialProvider) {
+    public UserDetails loadUserBySocialIdAndSocialProvider(String socialId, String socialProvider) {
         User user = userRepository.findByEmailAndProvider(socialId, socialProvider).orElseThrow(() -> new UserException(UserErrorResult.NOT_FOUND_USER));
-//        if (user == null) {
-//            throw new TokenException(TokenErrorResult.TOKEN_EXPIRED);
-//        } else {
-//            CustomUserDetails userDetails = new CustomUserDetails(user);
-//            return userDetails;
-//        }
         CustomUserDetails userDetails = new CustomUserDetails(user);
         return userDetails;
     }
