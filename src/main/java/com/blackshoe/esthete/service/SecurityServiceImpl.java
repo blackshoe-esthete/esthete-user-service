@@ -8,6 +8,7 @@ import com.blackshoe.esthete.exception.UserException;
 import com.blackshoe.esthete.jwt.JWTUtil;
 import com.blackshoe.esthete.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -25,6 +26,12 @@ public class SecurityServiceImpl implements SecurityService{
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
     private final RedisService redisUtil;
+
+    @Value("${myapp.access.expiration}")
+    private Long accessExpiration;
+
+    @Value("${myapp.refresh.expiration}")
+    private Long refreshExpiration;
 
 
     public Map<String, String> saveUserInSecurityContext(OAuth2Dto.OAuth2RequestDto requestDto) {
@@ -45,10 +52,10 @@ public class SecurityServiceImpl implements SecurityService{
         System.out.println("successful함수2" + username);
 
         String role = auth.getAuthority();
-        String access = jwtUtil.createJwt("access",username, role, 60*60*10L);
-        String refresh = jwtUtil.createJwt("refresh",username, role, 60*60*10L);
+        String access = jwtUtil.createJwt("access",username, role, accessExpiration);
+        String refresh = jwtUtil.createJwt("refresh",username, role, refreshExpiration);
 
-        redisUtil.setDataExpire(refresh, username, 86400000L);
+        redisUtil.setDataExpire(refresh, username, refreshExpiration);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);//ori
 
         if(authentication != null) {

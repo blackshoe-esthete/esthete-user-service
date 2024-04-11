@@ -44,6 +44,8 @@ public class JWTFilter extends OncePerRequestFilter {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
             //response body
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/plain");
             PrintWriter writer = response.getWriter();
             writer.print("AccessToken이 만료되었습니다.");
             //response status code
@@ -57,6 +59,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (!category.equals("access")) {
             //response body
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/plain");
             PrintWriter writer = response.getWriter();
             writer.print("유효하지 않은 AccessToken입니다.");
             //response status code

@@ -20,11 +20,6 @@ public class EmailController {
     private final EmailSendService mailService;
     private String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
 
-//    @PostMapping("/validation")
-//    public String mailSend(@RequestBody @Valid EmailDto.EmailRequestDto emailDto) {
-//        System.out.println("이메일 인증 이메일 :" + emailDto.getEmail());
-//        return mailService.joinEmail(emailDto.getEmail());
-//    }
     @PostMapping("/validation")
     public ResponseEntity<?> mailSend(@RequestBody @Valid EmailDto.EmailRequestDto requestDto) {
         try {

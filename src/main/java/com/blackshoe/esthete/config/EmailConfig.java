@@ -9,10 +9,10 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import java.util.Properties;
 @Configuration
 public class EmailConfig {
-    @Value("${MAIL_USERNAME}")
+    @Value("${myapp.email.username}")
     private String username;
 
-    @Value("${MAIL_PASSWORD}")
+    @Value("${myapp.email.password}")
     private String password;
 
     @Bean

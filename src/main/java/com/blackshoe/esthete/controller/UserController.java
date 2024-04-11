@@ -11,10 +11,12 @@ import com.blackshoe.esthete.service.RedisService;
 import com.blackshoe.esthete.service.SecurityService;
 import com.blackshoe.esthete.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,12 @@ public class UserController {
     private final RedisService redisUtil;
     private String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
     private String passwordRegex = "^(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,20}$";
+
+    @Value("${myapp.access.expiration}")
+    private Long accessExpiration;
+
+    @Value("${myapp.refresh.expiration}")
+    private Long refreshExpiration;
 
 
 
@@ -204,8 +212,9 @@ public class UserController {
                 return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
             }
 
-            //expired check
-            if(jwtUtil.isExpired(refresh)){
+            try {
+                jwtUtil.isExpired(refresh);
+            } catch (ExpiredJwtException e) {
                 System.out.println("Refresh 토큰이 만료되었습니다.");
                 UserErrorResult userErrorResult = UserErrorResult.EXPIRED_JWT;
                 ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
@@ -238,12 +247,12 @@ public class UserController {
             String role = jwtUtil.getRole(refresh);
 
             //make new JWT
-            String newAccess = jwtUtil.createJwt("access", username, role, 600000L);
-            String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+            String newAccess = jwtUtil.createJwt("access", username, role, accessExpiration);
+            String newRefresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration);
 
             //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
             redisUtil.deleteData(refresh);
-            redisUtil.setDataExpire(newRefresh, username, 86400000L);
+            redisUtil.setDataExpire(newRefresh, username, refreshExpiration);
 
             response.addHeader("Authorization", "Bearer "+ newAccess);
             response.addCookie(createCookie(newRefresh));

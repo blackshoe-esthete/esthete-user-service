@@ -106,6 +106,7 @@ public class SecurityConfig {
 
     }
 
+    @Bean
     protected CustomJsonUsernamePasswordAuthFilter getAuthenticationFilter(){
         CustomJsonUsernamePasswordAuthFilter authFilter = new CustomJsonUsernamePasswordAuthFilter(objectMapper, jwtUtil, redisUtil);
         try{

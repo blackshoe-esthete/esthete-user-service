@@ -10,6 +10,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 import org.springframework.util.MimeTypeUtils;
 
 import java.io.IOException;
@@ -29,8 +32,13 @@ import java.util.stream.Collectors;
 public class CustomJsonUsernamePasswordAuthFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
-
     private final RedisService redisUtil;
+
+    @Value("${myapp.access.expiration}")
+    private Long accessExpiration;
+
+    @Value("${myapp.refresh.expiration}")
+    private Long refreshExpiration;
 
 
     @Override
@@ -87,11 +95,11 @@ public class CustomJsonUsernamePasswordAuthFilter extends UsernamePasswordAuthen
 
         String role = auth.getAuthority();
 
-        String access = jwtUtil.createJwt("access",username, role, 60*60*10L); //첫 로그인이든 아니든 새로운 토큰 생성 후 반환
-        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String access = jwtUtil.createJwt("access",username, role, accessExpiration); //첫 로그인이든 아니든 새로운 토큰 생성 후 반환
+        String refresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration);
 
         //Refresh 토큰 저장
-        redisUtil.setDataExpire(refresh, username, 86400000L);
+        redisUtil.setDataExpire(refresh, username, refreshExpiration);
 
         response.addHeader("Authorization", "Bearer "+ access); // 인가 받은 사용자, Bearer뒤에 반드시 공백하나
         //response.setHeader("access", access);
