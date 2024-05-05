@@ -1,14 +1,14 @@
 package com.blackshoe.esthete.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
 public class UserException extends RuntimeException {
     private final UserErrorResult userErrorResult;
-    public UserException(UserErrorResult userErrorResult, String message) {
-        super(message);
+    public UserException(UserErrorResult userErrorResult) {
+        super(userErrorResult.getMessage());
         this.userErrorResult = userErrorResult;
     }
 }

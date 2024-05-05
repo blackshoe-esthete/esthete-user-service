@@ -1,21 +1,16 @@
 package com.blackshoe.esthete.dto;
 
 import com.blackshoe.esthete.entity.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
-    //    private final LoginDto.IDPWDto idpwDto;
     private final User userEntity;
-    //    public CustomUserDetails(LoginDto.IDPWDto idpwDto){
-//        this.idpwDto = idpwDto;
-//    }
-    public CustomUserDetails(User userEntity){
-        this.userEntity = userEntity;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

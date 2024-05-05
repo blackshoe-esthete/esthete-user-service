@@ -1,6 +1,6 @@
 package com.blackshoe.esthete.jwt;
 
-import com.blackshoe.esthete.service.RedisUtil;
+import com.blackshoe.esthete.service.RedisService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,20 +9,17 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
+@RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
-    private final RedisUtil redisUtil;
+    private final RedisService redisUtil;
 
-    public CustomLogoutFilter(JWTUtil jwtUtil, RedisUtil redisUtil) {
-
-        this.jwtUtil = jwtUtil;
-        this.redisUtil = redisUtil;
-    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

@@ -4,10 +4,11 @@ import com.blackshoe.esthete.dto.OAuth2Dto;
 import com.blackshoe.esthete.dto.ResponseDto;
 import com.blackshoe.esthete.dto.SignUpDto;
 import com.blackshoe.esthete.dto.LoginDto;
+import com.blackshoe.esthete.entity.Gender;
 import com.blackshoe.esthete.exception.UserErrorResult;
 import com.blackshoe.esthete.jwt.JWTUtil;
-import com.blackshoe.esthete.oauth2.SecurityService;
-import com.blackshoe.esthete.service.RedisUtil;
+import com.blackshoe.esthete.service.RedisService;
+import com.blackshoe.esthete.service.SecurityService;
 import com.blackshoe.esthete.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -15,12 +16,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -32,11 +32,16 @@ public class UserController {
     private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
     private  final SecurityService securityService;
-    private final RedisUtil redisUtil;
+    private final RedisService redisUtil;
     private String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
     private String passwordRegex = "^(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,20}$";
-    //닉네임 한글 포함 8자리 이하 특수문자X
-    //private String nicknameRegex = "^[가-힣a-zA-Z0-9]{1,10}$";
+
+    @Value("${myapp.access.expiration}")
+    private Long accessExpiration;
+
+    @Value("${myapp.refresh.expiration}")
+    private Long refreshExpiration;
+
 
 
     @PostMapping("/signup/next")
@@ -98,6 +103,13 @@ public class UserController {
                 return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
             }
 
+            if (requestDto.getGender() != Gender.MALE && requestDto.getGender() != Gender.FEMALE) {
+                System.out.println("성별은 MALE과 FEMALE만 받을 수 있습니다.");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_GENDER;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
             if (!userService.isValidDate(requestDto.getBirthday())) {
                 System.out.println("올바르지 않은 생년월일 형식");
                 UserErrorResult userErrorResult = UserErrorResult.INVALID_BIRTHDAY;
@@ -135,9 +147,24 @@ public class UserController {
                 return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
             }
 
+            if (!requestDto.getEmail().matches(emailRegex)) {
+                System.out.println("이메일 형식이 아닙니다");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_EMAIL;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
             if (!userService.isValidDate(requestDto.getBirthday())) {
                 System.out.println("올바르지 않은 생년월일 형식");
                 UserErrorResult userErrorResult = UserErrorResult.INVALID_BIRTHDAY;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            if (requestDto.getProvider().equals("NAVER") || requestDto.getProvider().equals("GOOGLE") || requestDto.getProvider().equals("KAKAO")) {
+                System.out.println("유효한 Provider가 아닙니다.");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_PROVIDER;
                 ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
                 return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
             }
@@ -168,70 +195,79 @@ public class UserController {
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-
-        //get refresh token
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-
-            if (cookie.getName().equals("refresh")) {
-
-                refresh = cookie.getValue();
+        try{
+            String refresh = null;
+            Cookie[] cookies = request.getCookies();
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refresh")) {
+                    refresh = cookie.getValue();
+                }
             }
+
+            if (refresh == null) {
+                //return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
+                System.out.println("Refresh 토큰이 비어있습니다");
+                UserErrorResult userErrorResult = UserErrorResult.NOT_FOUND_JWT;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            try {
+                jwtUtil.isExpired(refresh);
+            } catch (ExpiredJwtException e) {
+                System.out.println("Refresh 토큰이 만료되었습니다.");
+                UserErrorResult userErrorResult = UserErrorResult.EXPIRED_JWT;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
+            String category = jwtUtil.getCategory(refresh);
+
+            if (!category.equals("refresh")) {
+                System.out.println("Refresh 토큰이 아닙니다.");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_JWT;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+                //response status code
+                //return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
+
+            }
+            //DB에 저장되어 있는지 확인
+            boolean isExist = redisUtil.existsKey(refresh);
+            if (!isExist) {
+                //return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
+                System.out.println("Refresh 토큰을 찾을 수 없습니다.");
+                UserErrorResult userErrorResult = UserErrorResult.NOT_FOUND_JWT;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            String username = jwtUtil.getUsername(refresh);
+            String role = jwtUtil.getRole(refresh);
+
+            //make new JWT
+            String newAccess = jwtUtil.createJwt("access", username, role, accessExpiration);
+            String newRefresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration);
+
+            //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
+            redisUtil.deleteData(refresh);
+            redisUtil.setDataExpire(newRefresh, username, refreshExpiration);
+
+            response.addHeader("Authorization", "Bearer "+ newAccess);
+            response.addCookie(createCookie(newRefresh));
+
+            return ResponseEntity.status(HttpStatus.OK).body("Access, Refresh 재발급 성공");
+        }catch (Exception e) {
+            System.out.println("Access, Refresh 재발급 실패, 다시 요청해주세요.");
+            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
         }
 
-        if (refresh == null) {
-
-            //response status code
-            return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
-        }
-
-        //expired check
-        try {
-            jwtUtil.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
-
-            //response status code
-            return new ResponseEntity<>("refresh token expired", HttpStatus.BAD_REQUEST);
-        }
-
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
-        String category = jwtUtil.getCategory(refresh);
-
-        if (!category.equals("refresh")) {
-
-            //response status code
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
-        }
-        //DB에 저장되어 있는지 확인
-        boolean isExist = redisUtil.existsKey(refresh);
-        if (!isExist) {
-
-            //response body
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
-        }
-
-        String username = jwtUtil.getUsername(refresh);
-        String role = jwtUtil.getRole(refresh);
-
-        //make new JWT
-        String newAccess = jwtUtil.createJwt("access", username, role, 600000L);
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
-
-        //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
-        redisUtil.deleteData(refresh);
-        redisUtil.setDataExpire(newRefresh, username, 86400000L);
-
-        //response
-        //response.setHeader("access", newAccess);
-        response.addHeader("Authorization", "Bearer "+ newAccess);
-        response.addCookie(createCookie(newRefresh));
-
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private Cookie createCookie(String value) {
-
         Cookie cookie = new Cookie("refresh", value);
         cookie.setMaxAge(24*60*60);
         //cookie.setSecure(true);
@@ -245,6 +281,71 @@ public class UserController {
     public ResponseEntity<String> logout() {
         // logout logic implemented by logoutFilter
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+
+    @PutMapping("/id/check")
+    public ResponseEntity<?> checkUserId(@RequestBody LoginDto.FindIDRequestDto requestDto) {
+        try{
+            if (requestDto.getEmail() == null) {
+                System.out.println("이메일이 누락되었습니다.");
+                UserErrorResult userErrorResult = UserErrorResult.REQUIRED_VALUE;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            if (!requestDto.getEmail().matches(emailRegex)) {
+                System.out.println("이메일 형식이 아닙니다");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_EMAIL;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            userService.checkUserId(requestDto);
+            return ResponseEntity.status(HttpStatus.OK).body("가입되어 있는 이메일입니다.");
+
+        }catch (Exception e){
+            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
+        }
+    }
+
+    @PutMapping("/password/reset")
+    public ResponseEntity<ResponseDto> resetPassword(@RequestBody LoginDto.FindPasswordRequestDto requestDto) {
+        try{
+            if (requestDto.getEmail() == null || requestDto.getNewPassword() == null) {
+                System.out.println("필수값이 누락되었습니다.");
+                UserErrorResult userErrorResult = UserErrorResult.REQUIRED_VALUE;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            if (!requestDto.getEmail().matches(emailRegex)) {
+                System.out.println("이메일 형식이 아닙니다");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_EMAIL;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            if (!requestDto.getNewPassword().matches(passwordRegex)) {
+                System.out.println("유효하지 않은 비밀번호입니다.");
+                UserErrorResult userErrorResult = UserErrorResult.INVALID_PASSWORD;
+                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+
+                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+            }
+
+            LoginDto.FindPasswordResponseDto findPasswordResponseDto = userService.resetPassword(requestDto);
+            ResponseDto responseDto = ResponseDto.builder()
+                    .payload(objectMapper.convertValue(findPasswordResponseDto, Map.class))
+                    .build();
+            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        }catch (Exception e){
+            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
+        }
     }
 
 

@@ -9,19 +9,17 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import java.util.Properties;
 @Configuration
 public class EmailConfig {
-    @Value("${MAIL_USERNAME}")
+    @Value("${myapp.email.username}")
     private String username;
 
-    @Value("${MAIL_PASSWORD}")
+    @Value("${myapp.email.password}")
     private String password;
 
-    @Value("${MAIL_HOST}")
-    private String host;
     @Bean
     public JavaMailSender mailSender() {
 
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(host);
+        mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);// 587로 포트를 지정
         mailSender.setUsername(username);
         mailSender.setPassword(password);

@@ -8,6 +8,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,26 +18,20 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+@RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
-
-    public JWTFilter(JWTUtil jwtUtil){
-        this.jwtUtil = jwtUtil;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String authorization = request.getHeader("Authorization");
-        //String accessToken = request.getHeader("access");
         System.out.println("request: "+request.getMethod());
 
-
         // 토큰이 없다면 다음 필터로 넘김
-        if (authorization == null || !authorization.startsWith("Bearer ")) {//if (accessToken == null) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
             System.out.println("token null");
             filterChain.doFilter(request, response);
-
             return;
         }
 
@@ -47,11 +43,11 @@ public class JWTFilter extends OncePerRequestFilter {
         try {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
-
             //response body
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/plain");
             PrintWriter writer = response.getWriter();
-            writer.print("access token expired");
-
+            writer.print("AccessToken이 만료되었습니다.");
             //response status code
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -62,29 +58,21 @@ public class JWTFilter extends OncePerRequestFilter {
         System.out.println("category : " + category);
 
         if (!category.equals("access")) {
-
             //response body
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/plain");
             PrintWriter writer = response.getWriter();
-            writer.print("invalid access token");
-
+            writer.print("유효하지 않은 AccessToken입니다.");
             //response status code
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-
         //3. 정상적인 토큰인 경우
-
         String username = jwtUtil.getUsername(accessToken);
         System.out.println("username : " + username);
         String role = jwtUtil.getRole(accessToken);
 
-        //token에서 뽑아낸 정보들로 객체를 만듦
-//        LoginDto.IDPWDto idpwDto = LoginDto.IDPWDto.builder()
-//                .email(username)
-//                .password("tempPW")
-//                .role(role)
-//                .build();
         User userEntity = User.builder()
                 .email(username)
                 .role(Role.valueOf(role))
@@ -92,13 +80,9 @@ public class JWTFilter extends OncePerRequestFilter {
 
         //뽑아낸 객체를 customUSerDetails에 담기
         CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
-
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities()); // 다음 필터에서 사용자 role을 알 수 있도록 넘겨줌
-
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
-
-
     }
 }

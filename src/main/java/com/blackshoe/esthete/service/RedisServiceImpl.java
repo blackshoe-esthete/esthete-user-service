@@ -9,7 +9,7 @@ import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
-public class RedisUtil {
+public class RedisServiceImpl implements RedisService{
     private final StringRedisTemplate redisTemplate;//Redis에 접근하기 위한 Spring의 Redis 템플릿 클래스
 
     public String getData(String key){//지정된 키(key)에 해당하는 데이터를 Redis에서 가져오는 메서드
