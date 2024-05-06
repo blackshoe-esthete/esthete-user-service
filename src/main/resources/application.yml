@@ -1,2 +1,30 @@
 server:
   port: 8020
+
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${INITIAL_DB}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: ${SPRING_DATASOURCE_DDL_AUTO}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+  jwt:
+    secret: ${JWT_SECRET}
+
+myapp:
+  access:
+    expiration: ${ACCESS_EXPIRATION}
+  refresh:
+    expiration: ${REFRESH_EXPIRATION}
+  email:
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
