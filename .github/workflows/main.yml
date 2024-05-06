@@ -86,6 +86,9 @@ jobs:
                 -e INITIAL_DB='${{ secrets.INITIAL_DB }}' \
                 -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
                 -e SPRING_DATASOURCE_DDL_AUTO='${{ secrets.SPRING_DATASOURCE_DDL_AUTO }}' \
+                -e REDIS_HOST='${{ secrets.REDIS_HOST }}' \
+                -e MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}' \
+                -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sleep 15
             sudo docker image prune -af
