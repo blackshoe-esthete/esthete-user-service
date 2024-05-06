@@ -1,5 +1,4 @@
-name: github-action
-
+name: cicd for user-service
 on:
   push:
     branches: [ test ]
