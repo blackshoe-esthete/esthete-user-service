@@ -89,6 +89,7 @@ jobs:
                 -e REDIS_HOST='${{ secrets.REDIS_HOST }}' \
                 -e MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}' \
                 -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \
+                -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sleep 15
             sudo docker image prune -af
