@@ -1,0 +1,75 @@
+name: github-action
+
+on:
+  push:
+    branches: [ test ]
+  pull_request:
+    branches: [ test ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-northeast-2
+  IMAGE_NAME: esthete-user-service
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Determine Next Version
+        id: next-version
+        run: echo "NEXT_VERSION=$(git tag --sort version:refname | tail -n 1 | awk -F. -v OFS=. '{$NF++; print}')" >> $GITHUB_ENV
+
+      - name: Docker build & push
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_VERSION }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_VERSION }}
+
+      - name: Deploy to test erver
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_TEST_DNS }}
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          envs: GITHUB_SHA,NEXT_VERSION
+          script: |
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_VERSION }}
+            sudo docker stop ${{ env.IMAGE_NAME }} || true
+            sudo docker rm ${{ env.IMAGE_NAME }} || true
+            sudo docker run -d --name ${{ env.IMAGE_NAME }} -p 8020:8020 \
+                -e ACCESS_EXPIRATION='${{ secrets.ACCESS_EXPIRATION }}' \
+                -e DB_HOST='${{ secrets.DB_HOST }}' \
+                -e DB_PORT='${{ secrets.DB_PORT }}' \
+                -e DB_USERNAME='${{ secrets.DB_USERNAME }}' \
+                -e INITIAL_DB='${{ secrets.INITIAL_DB }}' \
+                -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
+                -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \
+                -e MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}' \
+                -e REDIS_HOST='${{ secrets.REDIS_HOST }}' \
+                -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
+                -e SPRING_DATASOURCE_DDL_AUTO='${{ secrets.SPRING_DATASOURCE_DDL_AUTO }}' \
+                ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_VERSION }}
+            sudo docker image prune -af
