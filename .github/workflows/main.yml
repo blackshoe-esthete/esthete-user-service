@@ -87,4 +87,5 @@ jobs:
                 -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
                 -e SPRING_DATASOURCE_DDL_AUTO='${{ secrets.SPRING_DATASOURCE_DDL_AUTO }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
+            sleep 15
             sudo docker image prune -af
