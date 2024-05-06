@@ -45,11 +45,11 @@ jobs:
           if ! git tag --sort version:refname | grep -q .; then
             git tag 1.0.0
           else
-            NEXT_VERSION=$(git tag --sort version:refname | tail -n 1 | awk -F. -v OFS=. '{$NF++; print}')
-            git tag $NEXT_VERSION
+            NEXT_USER_VER=$(git tag --sort version:refname | tail -n 1 | awk -F. -v OFS=. '{$NF++; print}')
+            git tag $NEXT_USER_VER
           fi
           git push --tags
-          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_ENV
+          echo "NEXT_USER_VER=$NEXT_USER_VER" >> $GITHUB_ENV
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -63,7 +63,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_VERSION }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
           platforms: linux/arm64
 
       - name: Deploy to test server
@@ -72,9 +72,9 @@ jobs:
           host: ${{ secrets.HOST_TEST_DNS }}
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
-          envs: GITHUB_SHA,NEXT_VERSION
+          envs: GITHUB_SHA,NEXT_USER_VER
           script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_VERSION }}
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sudo docker stop ${{ env.IMAGE_NAME }} || true
             sudo docker rm ${{ env.IMAGE_NAME }} || true
             sudo docker run -d --name ${{ env.IMAGE_NAME }} -p 8020:8020 \
@@ -86,5 +86,5 @@ jobs:
                 -e INITIAL_DB='${{ secrets.INITIAL_DB }}' \
                 -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
                 -e SPRING_DATASOURCE_DDL_AUTO='${{ secrets.SPRING_DATASOURCE_DDL_AUTO }}' \
-                ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_VERSION }}
+                ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sudo docker image prune -af
