@@ -78,6 +78,7 @@ jobs:
             sudo docker stop ${{ env.IMAGE_NAME }} || true
             sudo docker rm ${{ env.IMAGE_NAME }} || true
             sudo docker run -d --name ${{ env.IMAGE_NAME }} --network esthete-network -p 8020:8020 \
+                -v /var/log/user-service:/app/logs \
                 -e ACCESS_EXPIRATION='${{ secrets.ACCESS_EXPIRATION }}' \
                 -e DB_HOST='${{ secrets.DB_HOST }}' \
                 -e DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
