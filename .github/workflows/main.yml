@@ -77,7 +77,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sudo docker stop ${{ env.IMAGE_NAME }} || true
             sudo docker rm ${{ env.IMAGE_NAME }} || true
-            sudo docker run -d --name ${{ env.IMAGE_NAME }} --network user-network -p 8020:8020 \
+            sudo docker run -d --name ${{ env.IMAGE_NAME }} --network esthete-network -p 8020:8020 \
                 -e ACCESS_EXPIRATION='${{ secrets.ACCESS_EXPIRATION }}' \
                 -e DB_HOST='${{ secrets.DB_HOST }}' \
                 -e DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
@@ -87,6 +87,7 @@ jobs:
                 -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
                 -e SPRING_DATASOURCE_DDL_AUTO='${{ secrets.SPRING_DATASOURCE_DDL_AUTO }}' \
                 -e REDIS_HOST='${{ secrets.REDIS_HOST }}' \
+                -e REDIS_PORT='${{ secrets.REDIS_PORT }}' \
                 -e MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}' \
                 -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \
                 -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
