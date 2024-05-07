@@ -93,5 +93,4 @@ jobs:
                 -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sleep 15
-            sudo docker image prune -af
-            sudo docker images | grep ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }} | grep -v ${{ env.NEXT_USER_VER }} | awk '{print $3}' | xargs -r sudo docker rmi
+            sudo docker images | grep ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }} | grep -v ${{ env.NEXT_FILTER_VER }} | awk '{print $3}' | xargs -r sudo docker rmi
