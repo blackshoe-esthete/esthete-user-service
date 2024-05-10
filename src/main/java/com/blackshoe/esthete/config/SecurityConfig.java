@@ -91,7 +91,7 @@ public class SecurityConfig {
                 .requestMatchers(SWAGGER_URI).permitAll()
                 .requestMatchers("/login", "/", "/signup/next", "/signup/completion"
                         ,"/signup/email/validation", "/signup/email/verification"
-                        , "/reissue","/social-login", "/id/check", "/password/reset").permitAll()
+                        , "/reissue","/social-login", "/id/check", "/password/reset").permitAll() //reissue제외
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
 

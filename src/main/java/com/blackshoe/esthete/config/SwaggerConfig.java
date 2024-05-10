@@ -26,7 +26,7 @@ public class SwaggerConfig {
                 .security(Arrays.asList(securityRequirement))
                 .servers(Arrays.asList(
                         //new io.swagger.v3.oas.models.servers.Server().url("https://user-api.esthete.com").description("Production server"),
-                        new io.swagger.v3.oas.models.servers.Server().url("http://13.125.149.63:8020").description("Test Server"),
+                        new io.swagger.v3.oas.models.servers.Server().url("http://43.201.228.22:8020").description("Test Server"),
                         new io.swagger.v3.oas.models.servers.Server().url("http://localhost:8020").description("Local development server")
                 ));
     }
