@@ -348,5 +348,12 @@ public class UserController {
         }
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<ResponseDto> test() {
 
+        Map<String, String> map = Map.of("test", "test");
+        ResponseDto responseDto = ResponseDto.builder().payload(map).build();
+
+        return ResponseEntity.ok().body(responseDto);
+    }
 }
