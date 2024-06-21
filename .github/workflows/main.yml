@@ -92,6 +92,8 @@ jobs:
                 -e MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}' \
                 -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \
                 -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
+                -e EUREKA_HOST='${{ secrets.EUREKA_HOST }}' \
+                -e INSTANCE_HOST='${{ secrets.HOST_TEST_DNS }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }} || true
             sleep 15
             sudo docker image prune -af || true
