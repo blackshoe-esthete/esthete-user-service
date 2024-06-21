@@ -2,14 +2,16 @@ package com.blackshoe.esthete.controller;
 
 import com.blackshoe.esthete.dto.KafkaDto;
 import com.blackshoe.esthete.service.kafka.KafkaUserInfoProducerService;
+import com.blackshoe.esthete.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,5 +36,13 @@ public class TestController {
         kafkaUserInfoProducerService.createUser(userInfo);
 
         return ResponseEntity.ok("Kafka Test!");
+    }
+    @GetMapping("/gateway")
+    public ResponseEntity<ResponseDto> test() {
+
+        Map<String, String> map = Map.of("test", "test");
+        ResponseDto responseDto = ResponseDto.builder().payload(map).build();
+
+        return ResponseEntity.ok().body(responseDto);
     }
 }

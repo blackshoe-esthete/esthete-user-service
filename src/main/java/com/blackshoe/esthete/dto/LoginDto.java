@@ -21,18 +21,6 @@ public class LoginDto {
         private String password;
     }
 
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class ESTLoginResponseDto{
-        private UUID userId;
-        private String accessToken;
-        private String refreshToken;
-        private LocalDateTime createdAt;
-    }
 
     @Getter
     @Builder
@@ -41,17 +29,6 @@ public class LoginDto {
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class FindIDRequestDto{
-        private String phone;
-        private String verificationCode;
-    }
-
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class FindIDResponseDto{
         private String email;
     }
 
@@ -61,7 +38,7 @@ public class LoginDto {
     @AllArgsConstructor
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static class FindPasswordRequestDto{
+    public static class FindPasswordRequestDto{
         private String email;
         private String newPassword;
     }
@@ -72,21 +49,10 @@ public class LoginDto {
     @AllArgsConstructor
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static class FindPasswordResponseDto{
-        private UUID userId;
-        private LocalDateTime updatedAt;
+    public static class FindPasswordResponseDto{
+        private String updatedAt;
     }
 
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class IDPWDto{
-        private String email;
-        private String password;
-        private String role;
-    }
+
 
 }
