@@ -8,7 +8,7 @@ spring:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${INITIAL_DB}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=utf8&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     dialect: org.hibernate.dialect.MySQL8Dialect
-    username: ${DB_USERNAME}
+    username: ${DB_USERNAME} # test
     password: ${DB_PASSWORD}
   jpa:
     defer-datasource-initialization: true
