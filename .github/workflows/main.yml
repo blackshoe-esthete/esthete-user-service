@@ -90,8 +90,9 @@ jobs:
                 -e REDIS_HOST='${{ secrets.REDIS_HOST }}' \
                 -e REDIS_PORT='${{ secrets.REDIS_PORT }}' \
                 -e MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}' \
-                -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \
+                -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \            
                 -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
+            
                 -e EUREKA_HOST='${{ secrets.EUREKA_HOST }}' \
                 -e INSTANCE_HOST='${{ secrets.HOST_TEST_DNS }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }} || true
