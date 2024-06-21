@@ -1,9 +1,9 @@
 name: cicd for user-service
 on:
   push:
-    branches: [ test ]
+    branches: [ main, test ]
   pull_request:
-    branches: [ test ]
+    branches: [ main, test ]
   workflow_dispatch:
 
 env:
