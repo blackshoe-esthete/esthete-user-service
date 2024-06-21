@@ -45,7 +45,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	// kafka
-	implementation 'org.springframework.kafka:spring-kafka'
+	implementation group: 'org.springframework.kafka', name: 'spring-kafka'
+	implementation 'org.apache.kafka:kafka-clients:3.6.0'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 }
 
