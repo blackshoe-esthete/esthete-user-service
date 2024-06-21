@@ -74,25 +74,24 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           envs: GITHUB_SHA,NEXT_USER_VER
           script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sudo docker stop ${{ env.IMAGE_NAME }} || true
             sudo docker rm ${{ env.IMAGE_NAME }} || true
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sudo docker run -d --name ${{ env.IMAGE_NAME }} --network esthete-network -p 8020:8020 \
                 -v /var/log/user-service:/app/logs \
                 -e ACCESS_EXPIRATION='${{ secrets.ACCESS_EXPIRATION }}' \
+                -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
+                -e INITIAL_DB='${{ secrets.INITIAL_DB }}' \
+                -e MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}' \
+                -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \
                 -e DB_HOST='${{ secrets.DB_HOST }}' \
                 -e DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
                 -e DB_PORT='${{ secrets.DB_PORT }}' \
                 -e DB_USERNAME='${{ secrets.DB_USERNAME }}' \
-                -e INITIAL_DB='${{ secrets.INITIAL_DB }}' \
                 -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
                 -e SPRING_DATASOURCE_DDL_AUTO='${{ secrets.SPRING_DATASOURCE_DDL_AUTO }}' \
                 -e REDIS_HOST='${{ secrets.REDIS_HOST }}' \
                 -e REDIS_PORT='${{ secrets.REDIS_PORT }}' \
-                -e MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}' \
-                -e MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}' \            
-                -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
-            
                 -e EUREKA_HOST='${{ secrets.EUREKA_HOST }}' \
                 -e INSTANCE_HOST='${{ secrets.HOST_TEST_DNS }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }} || true
