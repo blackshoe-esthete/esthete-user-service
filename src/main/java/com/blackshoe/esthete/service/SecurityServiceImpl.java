@@ -52,8 +52,11 @@ public class SecurityServiceImpl implements SecurityService{
         System.out.println("successful함수2" + username);
 
         String role = auth.getAuthority();
-        String access = jwtUtil.createJwt("access",username, role, accessExpiration);
-        String refresh = jwtUtil.createJwt("refresh",username, role, refreshExpiration);
+        User findUser = userRepository.findByEmail(username).orElseThrow(() -> new UserException(UserErrorResult.NOT_FOUND_USER));
+        UUID userId = findUser.getUuid();
+
+        String access = jwtUtil.createJwt("access",username, userId, role, accessExpiration);
+        String refresh = jwtUtil.createJwt("refresh",username, userId, role, refreshExpiration);
 
         redisUtil.setDataExpire(refresh, username, refreshExpiration);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);//ori
