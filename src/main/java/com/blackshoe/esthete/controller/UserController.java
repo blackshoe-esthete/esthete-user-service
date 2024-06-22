@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -243,12 +244,13 @@ public class UserController {
                 return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
             }
 
+            UUID userId = jwtUtil.getUserId(refresh);
             String username = jwtUtil.getUsername(refresh);
             String role = jwtUtil.getRole(refresh);
 
             //make new JWT
-            String newAccess = jwtUtil.createJwt("access", username, role, accessExpiration);
-            String newRefresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration);
+            String newAccess = jwtUtil.createJwt("access", username, userId, role, accessExpiration);
+            String newRefresh = jwtUtil.createJwt("refresh", username, userId, role, refreshExpiration);
 
             //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
             redisUtil.deleteData(refresh);
