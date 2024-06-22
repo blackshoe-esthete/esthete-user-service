@@ -98,6 +98,8 @@ jobs:
                 -e REDIS_PORT='${{ secrets.REDIS_PORT }}' \
                 -e EUREKA_HOST='${{ secrets.EUREKA_HOST }}' \
                 -e INSTANCE_HOST='${{ secrets.HOST_TEST_DNS }}' \
+                -e KAFKA_HOST='${{ secrets.KAFKA_HOST }}' \
+                -e KAFKA_PORT='${{ secrets.KAFKA_PORT }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }} || true
             sleep 15
             sudo docker image prune -af || true
