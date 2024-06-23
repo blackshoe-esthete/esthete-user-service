@@ -6,6 +6,7 @@ import com.blackshoe.esthete.jwt.CustomLogoutFilter;
 import com.blackshoe.esthete.jwt.JWTFilter;
 import com.blackshoe.esthete.jwt.JWTUtil;
 //import com.blackshoe.esthete.jwt.LoginFilter;
+import com.blackshoe.esthete.repository.UserRepository;
 import com.blackshoe.esthete.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,7 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
     private final RedisService redisUtil;
+    private final UserRepository userRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws  Exception{
@@ -108,7 +110,7 @@ public class SecurityConfig {
 
     @Bean
     protected CustomJsonUsernamePasswordAuthFilter getAuthenticationFilter(){
-        CustomJsonUsernamePasswordAuthFilter authFilter = new CustomJsonUsernamePasswordAuthFilter(objectMapper, jwtUtil, redisUtil);
+        CustomJsonUsernamePasswordAuthFilter authFilter = new CustomJsonUsernamePasswordAuthFilter(objectMapper, jwtUtil, redisUtil, userRepository);
         try{
             authFilter.setFilterProcessesUrl("/login");
             authFilter.setAuthenticationManager(this.authenticationManager(authenticationConfiguration));
