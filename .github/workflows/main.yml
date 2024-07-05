@@ -82,7 +82,6 @@ jobs:
             sudo docker rm ${{ env.IMAGE_NAME }} || true
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }}
             sudo docker run -d --name ${{ env.IMAGE_NAME }} --network esthete-network -p 8020:8020 \
-                -v /var/log/user-service:/app/logs \
                 -e ACCESS_EXPIRATION='${{ secrets.ACCESS_EXPIRATION }}' \
                 -e REFRESH_EXPIRATION='${{ secrets.REFRESH_EXPIRATION }}' \
                 -e INITIAL_DB='${{ secrets.INITIAL_DB }}' \
@@ -98,6 +97,8 @@ jobs:
                 -e REDIS_PORT='${{ secrets.REDIS_PORT }}' \
                 -e EUREKA_HOST='${{ secrets.EUREKA_HOST }}' \
                 -e INSTANCE_HOST='${{ secrets.HOST_TEST_DNS }}' \
+                -e KAFKA_HOST='${{ secrets.KAFKA_HOST }}' \
+                -e KAFKA_PORT='${{ secrets.KAFKA_PORT }}' \
                 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEXT_USER_VER }} || true
             sleep 15
             sudo docker image prune -af || true

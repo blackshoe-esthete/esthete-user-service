@@ -3,6 +3,10 @@ package com.blackshoe.esthete.jwt;//package com.blackshoe.esthete.jwt;
 
 import com.blackshoe.esthete.dto.CustomUserDetails;
 import com.blackshoe.esthete.dto.LoginDto;
+import com.blackshoe.esthete.entity.User;
+import com.blackshoe.esthete.exception.UserErrorResult;
+import com.blackshoe.esthete.exception.UserException;
+import com.blackshoe.esthete.repository.UserRepository;
 import com.blackshoe.esthete.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -26,6 +30,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -33,6 +39,7 @@ public class CustomJsonUsernamePasswordAuthFilter extends UsernamePasswordAuthen
     private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
     private final RedisService redisUtil;
+    private final UserRepository userRepository; //++
 
     @Value("${myapp.access.expiration}")
     private Long accessExpiration;
@@ -84,7 +91,7 @@ public class CustomJsonUsernamePasswordAuthFilter extends UsernamePasswordAuthen
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException{
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();//authentication에 있는 user정보를 가져오는것
 
-        String username = customUserDetails.getUsername();
+        String username = customUserDetails.getUsername(); // 아이디
         System.out.println("successful함수" + username);
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -94,9 +101,11 @@ public class CustomJsonUsernamePasswordAuthFilter extends UsernamePasswordAuthen
         System.out.println("successful함수2" + username);
 
         String role = auth.getAuthority();
+        User findUser = userRepository.findByEmail(username).orElseThrow(() -> new UserException(UserErrorResult.NOT_FOUND_USER));
+        UUID userId = findUser.getUuid();
 
-        String access = jwtUtil.createJwt("access",username, role, accessExpiration); //첫 로그인이든 아니든 새로운 토큰 생성 후 반환
-        String refresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration);
+        String access = jwtUtil.createJwt("access",username, userId, role, accessExpiration); //첫 로그인이든 아니든 새로운 토큰 생성 후 반환
+        String refresh = jwtUtil.createJwt("refresh", username, userId, role, refreshExpiration);
 
         //Refresh 토큰 저장
         redisUtil.setDataExpire(refresh, username, refreshExpiration);
