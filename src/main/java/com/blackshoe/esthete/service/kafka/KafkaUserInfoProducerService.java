@@ -1,8 +1,8 @@
 package com.blackshoe.esthete.service.kafka;
 
-import com.blackshoe.esthete.dto.KafkaDto;
+import com.blackshoe.esthete.dto.KafkaProducerDto;
 import com.blackshoe.esthete.entity.User;
 
 public interface KafkaUserInfoProducerService {
-    void createUser(User user);
+    void createUser(KafkaProducerDto.UserCreate userCreate);
 }

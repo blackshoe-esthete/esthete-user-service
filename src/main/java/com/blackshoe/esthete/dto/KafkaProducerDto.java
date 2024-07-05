@@ -13,25 +13,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class KafkaDto {
+public class KafkaProducerDto {
     @Getter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class FilterUserInfo {
-        private UUID userId;
-        private String nickname;
-    }
-
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class ExhibitionUserInfo {
+    public static class UserCreate {
         private UUID userId;
         private String nickname;
         private String email;

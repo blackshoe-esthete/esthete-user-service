@@ -1,6 +1,6 @@
 package com.blackshoe.esthete.controller;
 
-import com.blackshoe.esthete.dto.KafkaDto;
+import com.blackshoe.esthete.dto.KafkaProducerDto;
 import com.blackshoe.esthete.entity.Gender;
 import com.blackshoe.esthete.entity.User;
 import com.blackshoe.esthete.service.kafka.KafkaUserInfoProducerService;
@@ -42,7 +42,15 @@ public class TestController {
                 .nickname("Anny")
                 .build();
 
-        kafkaUserInfoProducerService.createUser(user);
+        KafkaProducerDto.UserCreate userCreate = KafkaProducerDto.UserCreate.builder()
+                .userId(user.getUuid())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .gender(user.getGender())
+                .birthday(user.getBirthday())
+                .build();
+
+        kafkaUserInfoProducerService.createUser(userCreate);
 
         return ResponseEntity.ok("Kafka Test!");
     }
