@@ -3,6 +3,7 @@ package com.blackshoe.esthete.controller;
 import com.blackshoe.esthete.dto.KafkaProducerDto;
 import com.blackshoe.esthete.entity.Gender;
 import com.blackshoe.esthete.entity.User;
+import com.blackshoe.esthete.repository.UserRepository;
 import com.blackshoe.esthete.service.kafka.KafkaUserInfoProducerService;
 import com.blackshoe.esthete.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class TestController {
 
     private final KafkaUserInfoProducerService kafkaUserInfoProducerService;
+    private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<?> Test() {
@@ -50,6 +52,7 @@ public class TestController {
                 .birthday(user.getBirthday())
                 .build();
 
+        userRepository.save(user);
         kafkaUserInfoProducerService.createUser(userCreate);
 
         return ResponseEntity.ok("Kafka Test!");
