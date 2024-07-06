@@ -20,11 +20,9 @@ import java.util.UUID;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class KafkaUserDeleteConsumerServiceImpl {
+public class KafkaUserDeleteConsumerServiceImpl implements KafkaUserDeleteConsumerService{
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
-    private final RedisService redisService;
-    private final JWTUtil jwtUtil;
 
     @KafkaListener(topics = "user-delete")
     @Transactional
