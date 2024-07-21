@@ -138,38 +138,65 @@ public class UserController {
         return ResponseEntity.ok("Login successful");
     }
 
+//    @PostMapping("/social-login")
+//    public ResponseEntity<ResponseDto> socialLogin(@RequestBody OAuth2Dto.OAuth2RequestDto requestDto, HttpServletResponse response){
+//        try{
+//            if (requestDto.getProvider() == null || requestDto.getNickname() == null || requestDto.getEmail() == null) { // gender와 birthday는 필수 값 아닌걸로
+//                System.out.println("필수 값이 누락되었습니다.");
+//                UserErrorResult userErrorResult = UserErrorResult.REQUIRED_VALUE;
+//                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+//                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+//            }
+//
+//            if (!requestDto.getEmail().matches(emailRegex)) {
+//                System.out.println("이메일 형식이 아닙니다");
+//                UserErrorResult userErrorResult = UserErrorResult.INVALID_EMAIL;
+//                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+//
+//                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+//            }
+//
+//            if (!userService.isValidDate(requestDto.getBirthday())) {
+//                System.out.println("올바르지 않은 생년월일 형식");
+//                UserErrorResult userErrorResult = UserErrorResult.INVALID_BIRTHDAY;
+//                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+//                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+//            }
+//
+//            if (requestDto.getProvider().equals("NAVER") || requestDto.getProvider().equals("GOOGLE") || requestDto.getProvider().equals("KAKAO")) {
+//                System.out.println("유효한 Provider가 아닙니다.");
+//                UserErrorResult userErrorResult = UserErrorResult.INVALID_PROVIDER;
+//                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
+//                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
+//            }
+//
+//            OAuth2Dto.OAuth2ResponseDto oAuth2ResponseDto = userService.socialLogin(requestDto);
+//            ResponseDto responseDto = ResponseDto.builder()
+//                    .payload(objectMapper.convertValue(oAuth2ResponseDto, Map.class))
+//                    .build();
+//
+//            //jwt토큰 발급
+//            Map<String, String> tokens = securityService.saveUserInSecurityContext(requestDto);
+//            String accessToken = tokens.get("accessToken");
+//            String refreshToken = tokens.get("refreshToken");
+//
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.add("Authorization", "Bearer " + accessToken);
+//            response.addCookie(createCookie(refreshToken));
+//
+//            return ResponseEntity.ok().headers(headers).body(responseDto);
+//        }catch (Exception e){
+//            System.out.println("소셜로그인 실패");
+//            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+//
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
+//        }
+//
+//    }
+
     @PostMapping("/social-login")
     public ResponseEntity<ResponseDto> socialLogin(@RequestBody OAuth2Dto.OAuth2RequestDto requestDto, HttpServletResponse response){
         try{
-            if (requestDto.getProvider() == null || requestDto.getNickname() == null || requestDto.getEmail() == null) { // gender와 birthday는 필수 값 아닌걸로
-                System.out.println("필수 값이 누락되었습니다.");
-                UserErrorResult userErrorResult = UserErrorResult.REQUIRED_VALUE;
-                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
-                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
-            }
-
-            if (!requestDto.getEmail().matches(emailRegex)) {
-                System.out.println("이메일 형식이 아닙니다");
-                UserErrorResult userErrorResult = UserErrorResult.INVALID_EMAIL;
-                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
-
-                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
-            }
-
-            if (!userService.isValidDate(requestDto.getBirthday())) {
-                System.out.println("올바르지 않은 생년월일 형식");
-                UserErrorResult userErrorResult = UserErrorResult.INVALID_BIRTHDAY;
-                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
-                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
-            }
-
-            if (requestDto.getProvider().equals("NAVER") || requestDto.getProvider().equals("GOOGLE") || requestDto.getProvider().equals("KAKAO")) {
-                System.out.println("유효한 Provider가 아닙니다.");
-                UserErrorResult userErrorResult = UserErrorResult.INVALID_PROVIDER;
-                ResponseDto responseDto = ResponseDto.builder().error(userErrorResult.getMessage()).build();
-                return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
-            }
-
             OAuth2Dto.OAuth2ResponseDto oAuth2ResponseDto = userService.socialLogin(requestDto);
             ResponseDto responseDto = ResponseDto.builder()
                     .payload(objectMapper.convertValue(oAuth2ResponseDto, Map.class))
@@ -349,6 +376,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
         }
     }
+
+
 
 
 }

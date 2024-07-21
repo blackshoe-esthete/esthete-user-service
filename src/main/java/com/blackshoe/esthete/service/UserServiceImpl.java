@@ -1,5 +1,6 @@
 package com.blackshoe.esthete.service;
 
+import com.blackshoe.esthete.dto.KafkaProducerDto;
 import com.blackshoe.esthete.dto.LoginDto;
 import com.blackshoe.esthete.dto.OAuth2Dto;
 import com.blackshoe.esthete.dto.SignUpDto;
@@ -9,6 +10,7 @@ import com.blackshoe.esthete.entity.User;
 import com.blackshoe.esthete.exception.UserErrorResult;
 import com.blackshoe.esthete.exception.UserException;
 import com.blackshoe.esthete.repository.UserRepository;
+import com.blackshoe.esthete.service.kafka.KafkaUserInfoProducerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final KafkaUserInfoProducerService kafkaUserInfoProducerService;
 
     public SignUpDto.ESTSignUpNextResponseDto joinUserNext(SignUpDto.ESTSignUpNextRequestDto requestDto) {// 얘는 그냥 회원가입 폼
         User newUser = User.builder()
@@ -53,6 +56,17 @@ public class UserServiceImpl implements UserService{
         user.addUserInfo(nickname, gender,birthday);
 
         User savedUser = userRepository.save(user);
+
+        // kafka로 새로운 회원정보 넘겨주기
+        KafkaProducerDto.UserCreate userCreate = KafkaProducerDto.UserCreate.builder()
+                .userId(savedUser.getUuid())
+                .nickname(savedUser.getNickname())
+                .email(savedUser.getEmail())
+                .gender(savedUser.getGender())
+                .birthday(savedUser.getBirthday())
+                .build();
+
+        kafkaUserInfoProducerService.createUser(userCreate);
 
         return SignUpDto.ESTSignUpCompletionResponseDto.builder()
                 .createdAt(savedUser.getCreatedAt())
