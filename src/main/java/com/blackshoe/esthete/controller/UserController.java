@@ -303,7 +303,7 @@ public class UserController {
                 return ResponseEntity.status(userErrorResult.getHttpStatus()).body(responseDto);
             }
 
-            UUID userId = jwtUtil.getUserId(refresh);
+            UUID userId = UUID.fromString(jwtUtil.getUserId(refresh));
             String username = jwtUtil.getUsername(refresh);
             String role = jwtUtil.getRole(refresh);
 
