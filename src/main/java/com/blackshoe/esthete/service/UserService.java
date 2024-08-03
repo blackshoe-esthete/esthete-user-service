@@ -11,7 +11,8 @@ public interface UserService {
     SignUpDto.ESTSignUpCompletionResponseDto joinUserCompletion(SignUpDto.ESTSignUpCompletionRequestDto requestDto);
     boolean userExistByEmail(String email);
     boolean isValidDate(LocalDate birthday);
-    OAuth2Dto.OAuth2ResponseDto socialLogin(OAuth2Dto.OAuth2RequestDto requestDto);
+    OAuth2Dto.OAuth2CheckResponseDto socialLogin(OAuth2Dto.OAuth2CheckDto requestDto);
+    OAuth2Dto.OAuth2ResponseDto socialLoginForSignUp(OAuth2Dto.OAuth2SignUpRequestDto requestDto);
     void checkUserId(LoginDto.FindIDRequestDto requestDto);
     LoginDto.FindPasswordResponseDto resetPassword(LoginDto.FindPasswordRequestDto requestDto);
 

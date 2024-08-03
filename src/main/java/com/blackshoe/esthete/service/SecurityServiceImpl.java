@@ -34,7 +34,13 @@ public class SecurityServiceImpl implements SecurityService{
     private Long refreshExpiration;
 
 
-    public Map<String, String> saveUserInSecurityContext(OAuth2Dto.OAuth2RequestDto requestDto) {
+    public Map<String, String> saveUserInSecurityContext(OAuth2Dto.OAuth2CheckDto requestDto) {
+        String socialId = requestDto.getEmail();
+        String socialProvider = requestDto.getProvider();
+        return saveUserInSecurityContext(socialId, socialProvider);
+    }
+
+    public Map<String, String> saveUserInSecurityContextForOAuthSignUp(OAuth2Dto.OAuth2SignUpRequestDto requestDto) {
         String socialId = requestDto.getEmail();
         String socialProvider = requestDto.getProvider();
         return saveUserInSecurityContext(socialId, socialProvider);

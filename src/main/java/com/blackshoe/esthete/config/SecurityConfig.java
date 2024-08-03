@@ -93,7 +93,7 @@ public class SecurityConfig {
                 .requestMatchers(SWAGGER_URI).permitAll()
                 .requestMatchers("/login", "/", "/signup/next", "/signup/completion"
                         ,"/signup/email/validation", "/signup/email/verification"
-                        , "/reissue","/social-login", "/id/check", "/password/reset", "/test/gateway","/test/kafka").permitAll() //reissue제외
+                        , "/reissue","/social-login", "/social-login/signup", "/id/check", "/password/reset", "/test/gateway","/test/kafka").permitAll() //reissue제외
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
 

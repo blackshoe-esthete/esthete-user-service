@@ -194,16 +194,48 @@ public class UserController {
 //
 //    }
 
-    @PostMapping("/social-login")
-    public ResponseEntity<ResponseDto> socialLogin(@RequestBody OAuth2Dto.OAuth2RequestDto requestDto, HttpServletResponse response){
+    @PostMapping("/social-login") // email, provider 받아서 있는 회원이면 자체 토큰이랑 true 응답, 없으면 false 응답
+    public ResponseEntity<ResponseDto> socialLogin(@RequestBody OAuth2Dto.OAuth2CheckDto requestDto, HttpServletResponse response){
         try{
-            OAuth2Dto.OAuth2ResponseDto oAuth2ResponseDto = userService.socialLogin(requestDto);
+            OAuth2Dto.OAuth2CheckResponseDto oAuth2CheckResponseDto = userService.socialLogin(requestDto);
+            ResponseDto responseDto = ResponseDto.builder()
+                    .payload(objectMapper.convertValue(oAuth2CheckResponseDto, Map.class))
+                    .build();
+
+            if(oAuth2CheckResponseDto.isMembered()){ // 기존 회원인 경우만 토큰 발급
+                //jwt토큰 발급
+                Map<String, String> tokens = securityService.saveUserInSecurityContext(requestDto);
+                String accessToken = tokens.get("accessToken");
+                String refreshToken = tokens.get("refreshToken");
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Authorization", "Bearer " + accessToken);
+                response.addCookie(createCookie(refreshToken));
+
+                return ResponseEntity.ok().headers(headers).body(responseDto);
+            }
+            else{
+                return ResponseEntity.ok().body(responseDto);
+            }
+
+        }catch (Exception e){
+            System.out.println("소셜로그인 실패");
+            ResponseDto responseDto = ResponseDto.builder().error(e.getMessage()).build();
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
+        }
+    }
+
+    @PostMapping("/social-login/signup") // 회원이 아닌 경우 -> 회원정보 다 받아서 저장하기
+    public ResponseEntity<ResponseDto> socialLoginForSignUp(@RequestBody OAuth2Dto.OAuth2SignUpRequestDto requestDto, HttpServletResponse response){
+        try{
+            OAuth2Dto.OAuth2ResponseDto oAuth2ResponseDto = userService.socialLoginForSignUp(requestDto);
             ResponseDto responseDto = ResponseDto.builder()
                     .payload(objectMapper.convertValue(oAuth2ResponseDto, Map.class))
                     .build();
 
             //jwt토큰 발급
-            Map<String, String> tokens = securityService.saveUserInSecurityContext(requestDto);
+            Map<String, String> tokens = securityService.saveUserInSecurityContextForOAuthSignUp(requestDto);
             String accessToken = tokens.get("accessToken");
             String refreshToken = tokens.get("refreshToken");
 
