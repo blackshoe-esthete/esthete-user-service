@@ -16,6 +16,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -194,15 +196,16 @@ public class UserController {
 //
 //    }
 
-    @PostMapping("/social-login") // email, provider 받아서 있는 회원이면 자체 토큰이랑 true 응답, 없으면 false 응답
+    @PostMapping("/social-login") // nickname, provider 받아서 있는 회원이면 자체 토큰이랑 true 응답, 없으면 false 응답
     public ResponseEntity<ResponseDto> socialLogin(@RequestBody OAuth2Dto.OAuth2CheckDto requestDto, HttpServletResponse response){
         try{
             OAuth2Dto.OAuth2CheckResponseDto oAuth2CheckResponseDto = userService.socialLogin(requestDto);
             ResponseDto responseDto = ResponseDto.builder()
                     .payload(objectMapper.convertValue(oAuth2CheckResponseDto, Map.class))
                     .build();
-
+            log.info("1.---------------------");
             if(oAuth2CheckResponseDto.isMembered()){ // 기존 회원인 경우만 토큰 발급
+                log.info("2.---------------------");
                 //jwt토큰 발급
                 Map<String, String> tokens = securityService.saveUserInSecurityContext(requestDto);
                 String accessToken = tokens.get("accessToken");
@@ -215,6 +218,7 @@ public class UserController {
                 return ResponseEntity.ok().headers(headers).body(responseDto);
             }
             else{
+                log.info("3.---------------------");
                 return ResponseEntity.ok().body(responseDto);
             }
 
