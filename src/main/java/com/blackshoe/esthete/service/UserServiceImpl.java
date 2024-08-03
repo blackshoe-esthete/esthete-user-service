@@ -92,10 +92,11 @@ public class UserServiceImpl implements UserService{
 
 
     public OAuth2Dto.OAuth2CheckResponseDto socialLogin(OAuth2Dto.OAuth2CheckDto requestDto){
-        String socialId = requestDto.getEmail();
-        String socialProvider = requestDto.getProvider();
+        String originalNickname = requestDto.getOriginalNickname();
+        String provider = requestDto.getProvider();
 
-        Optional<User> user = userRepository.findByEmail(socialId);
+        Optional<User> user = userRepository.findByOriginalNicknameAndProvider(originalNickname, provider);
+        log.info("user info: " + user.get().getEmail());
 
         if(user.isPresent()){
             log.info("기존에 존재하는 회원입니다.");
@@ -104,7 +105,7 @@ public class UserServiceImpl implements UserService{
                     .build();
         }
         else{
-            log.info("존재하지 않는 회원입니다..");
+            log.info("존재하지 않는 회원입니다.");
             return OAuth2Dto.OAuth2CheckResponseDto.builder()
                     .isMembered(false)
                     .build();
@@ -118,6 +119,7 @@ public class UserServiceImpl implements UserService{
                 .uuid(UUID.randomUUID())
                 .provider(requestDto.getProvider())
                 .nickname(requestDto.getNickname())
+                .originalNickname(requestDto.getOriginalNickname())
                 .email(requestDto.getEmail())
                 .role(Role.USER)
                 .gender(requestDto.getGender())
