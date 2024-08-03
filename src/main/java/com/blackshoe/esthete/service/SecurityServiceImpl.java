@@ -35,13 +35,13 @@ public class SecurityServiceImpl implements SecurityService{
 
 
     public Map<String, String> saveUserInSecurityContext(OAuth2Dto.OAuth2CheckDto requestDto) {
-        String socialId = requestDto.getEmail();
+        String socialId = requestDto.getOriginalNickname();
         String socialProvider = requestDto.getProvider();
         return saveUserInSecurityContext(socialId, socialProvider);
     }
 
     public Map<String, String> saveUserInSecurityContextForOAuthSignUp(OAuth2Dto.OAuth2SignUpRequestDto requestDto) {
-        String socialId = requestDto.getEmail();
+        String socialId = requestDto.getOriginalNickname();
         String socialProvider = requestDto.getProvider();
         return saveUserInSecurityContext(socialId, socialProvider);
     }
@@ -81,7 +81,7 @@ public class SecurityServiceImpl implements SecurityService{
     }
 
     public UserDetails loadUserBySocialIdAndSocialProvider(String socialId, String socialProvider) {
-        User user = userRepository.findByEmailAndProvider(socialId, socialProvider).orElseThrow(() -> new UserException(UserErrorResult.NOT_FOUND_USER));
+        User user = userRepository.findByOriginalNicknameAndProvider(socialId, socialProvider).orElseThrow(() -> new UserException(UserErrorResult.NOT_FOUND_USER));
         CustomUserDetails userDetails = new CustomUserDetails(user);
         return userDetails;
     }
