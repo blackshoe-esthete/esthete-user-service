@@ -18,8 +18,9 @@ public class OAuth2Dto {
     @AllArgsConstructor
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class OAuth2RequestDto{
+    public static class OAuth2SignUpRequestDto{
         private String provider;
+        private String originalNickname;
         private String nickname;
         private String email;
         private Gender gender;
@@ -32,9 +33,19 @@ public class OAuth2Dto {
     @AllArgsConstructor
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class OAuth2SomeInfoDto{
-        private String email;
+    public static class OAuth2CheckDto{
+        private String originalNickname;
         private String provider;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class OAuth2CheckResponseDto{
+        private boolean isMembered;
     }
 
     @Getter
