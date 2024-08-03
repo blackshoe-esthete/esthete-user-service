@@ -38,6 +38,9 @@ public class User {
     @Column(name = "nickname", length = 100)
     private String nickname;
 
+    @Column(name = "original-nickname", length = 100)
+    private String originalNickname;
+
     @Column(name = "email", length = 50)
     private String email;
 
@@ -73,10 +76,11 @@ public class User {
     }
 
     @Builder // 소셜로그인
-    public User(UUID uuid, String provider, String nickname, String email, String password, Role role, Gender gender, LocalDate birthday, String phone) {
+    public User(UUID uuid, String provider, String nickname, String originalNickname, String email, String password, Role role, Gender gender, LocalDate birthday, String phone) {
         this.uuid = uuid;
         this.provider = provider;
         this.nickname = nickname;
+        this.originalNickname = originalNickname;
         this.email = email;
         this.password = password;
         //this.role = Role.valueOf("USER");

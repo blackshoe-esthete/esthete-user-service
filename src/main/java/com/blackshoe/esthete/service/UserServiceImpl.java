@@ -12,6 +12,7 @@ import com.blackshoe.esthete.exception.UserException;
 import com.blackshoe.esthete.repository.UserRepository;
 import com.blackshoe.esthete.service.kafka.KafkaUserInfoProducerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
@@ -89,48 +91,48 @@ public class UserServiceImpl implements UserService{
     }
 
 
-    public OAuth2Dto.OAuth2ResponseDto socialLogin(OAuth2Dto.OAuth2RequestDto requestDto){
-        String socialId = requestDto.getEmail();
-        System.out.println("socialId : "+ socialId);
-        String socialProvider = requestDto.getProvider();
-        System.out.println("socialProvider : "+ socialProvider);
+    public OAuth2Dto.OAuth2CheckResponseDto socialLogin(OAuth2Dto.OAuth2CheckDto requestDto){
+        String originalNickname = requestDto.getOriginalNickname();
+        String provider = requestDto.getProvider();
 
-        //기존 회원인지 판단
-        Optional<User> userOptional = userRepository.findByEmail(socialId);
+        Optional<User> user = userRepository.findByOriginalNicknameAndProvider(originalNickname, provider);
+        log.info("user info: " + user.get().getEmail());
 
-        if(userOptional.isEmpty()){
-            System.out.println("처음 로그인한 회원임으로 회원가입을 진행합니다. ");
-            User newUser = User.builder()
-                    .uuid(UUID.randomUUID())
-                    .provider(requestDto.getProvider())
-                    .nickname(requestDto.getNickname())
-                    .email(requestDto.getEmail())
-                    .role(Role.USER)
-                    .gender(requestDto.getGender())
-                    .birthday(requestDto.getBirthday())
-                    .build();
-
-            User socialUser = userRepository.save(newUser);
-
-            return OAuth2Dto.OAuth2ResponseDto.builder()
-                    .userId(socialUser.getUuid())
-                    .provider(socialUser.getProvider())
-                    .createdAt(socialUser.getCreatedAt())
+        if(user.isPresent()){
+            log.info("기존에 존재하는 회원입니다.");
+            return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                    .isMembered(true)
                     .build();
         }
         else{
-            System.out.println("기존에 존재하는 회원입니다. 정보를 업데이트 합니다.");
-            User user = userOptional.get();
-            user.updateUserInfo(requestDto.getNickname(), requestDto.getGender(), requestDto.getBirthday());
-            User socialUser = userRepository.save(user);
-
-            return OAuth2Dto.OAuth2ResponseDto.builder()
-                    .userId(socialUser.getUuid())
-                    .provider(socialUser.getProvider())
-                    .updatedAt(socialUser.getUpdatedAt())
+            log.info("존재하지 않는 회원입니다.");
+            return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                    .isMembered(false)
                     .build();
         }
+    }
 
+    public OAuth2Dto.OAuth2ResponseDto socialLoginForSignUp(OAuth2Dto.OAuth2SignUpRequestDto requestDto){
+        log.info("처음 로그인한 회원임으로 회원가입을 진행합니다. ");
+
+        User newUser = User.builder()
+                .uuid(UUID.randomUUID())
+                .provider(requestDto.getProvider())
+                .nickname(requestDto.getNickname())
+                .originalNickname(requestDto.getOriginalNickname())
+                .email(requestDto.getEmail())
+                .role(Role.USER)
+                .gender(requestDto.getGender())
+                .birthday(requestDto.getBirthday())
+                .build();
+
+        User socialUser = userRepository.save(newUser);
+
+        return OAuth2Dto.OAuth2ResponseDto.builder()
+                .userId(socialUser.getUuid())
+                .provider(socialUser.getProvider())
+                .createdAt(socialUser.getCreatedAt())
+                .build();
     }
 
 
