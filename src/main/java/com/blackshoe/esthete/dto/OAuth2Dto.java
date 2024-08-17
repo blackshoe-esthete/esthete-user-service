@@ -20,7 +20,8 @@ public class OAuth2Dto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OAuth2SignUpRequestDto{
         private String provider;
-        private String originalNickname;
+        private String kakaoId;
+        private String naverid;
         private String nickname;
         private String email;
         private Gender gender;
@@ -34,7 +35,9 @@ public class OAuth2Dto {
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OAuth2CheckDto{
-        private String originalNickname;
+        private String naverId;
+        private String kakaoId;
+        private String email;
         private String provider;
     }
 
