@@ -13,6 +13,7 @@ import com.blackshoe.esthete.repository.UserRepository;
 import com.blackshoe.esthete.service.kafka.KafkaUserInfoProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final KafkaUserInfoProducerService kafkaUserInfoProducerService;
+    private final Oauth2Service oauth2Service;
 
     public SignUpDto.ESTSignUpNextResponseDto joinUserNext(SignUpDto.ESTSignUpNextRequestDto requestDto) {// 얘는 그냥 회원가입 폼
         User newUser = User.builder()
@@ -91,47 +93,193 @@ public class UserServiceImpl implements UserService{
     }
 
 
-    public OAuth2Dto.OAuth2CheckResponseDto socialLogin(OAuth2Dto.OAuth2CheckDto requestDto){
-        String originalNickname = requestDto.getOriginalNickname();
-        String provider = requestDto.getProvider();
+    public OAuth2Dto.OAuth2CheckResponseDto socialLogin(OAuth2Dto.OAuth2CheckDto requestDto, String accessToken){
+        if(requestDto.getProvider().equals("kakao")){
+            String kakaoId = requestDto.getKakaoId();
+            String provider = requestDto.getProvider();
 
-        Optional<User> user = userRepository.findByOriginalNicknameAndProvider(originalNickname, provider);
-        log.info("user info: " + user.get().getEmail());
+            Optional<User> kakaoUser = userRepository.findByKakaoIdAndProvider(kakaoId, provider);
+            log.info("kakao repository에서 찾은 후");
 
-        if(user.isPresent()){
-            log.info("기존에 존재하는 회원입니다.");
-            return OAuth2Dto.OAuth2CheckResponseDto.builder()
-                    .isMembered(true)
-                    .build();
+            if(kakaoUser.isPresent()){
+                String checkedKakaoId = oauth2Service.getUserInfo(provider, accessToken);
+                if(kakaoId.equals(checkedKakaoId)){
+                    log.info("기존에 존재하는 카카오 회원입니다.");
+                    return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                            .isMembered(true)
+                            .build();
+                }else {
+                    throw new IllegalArgumentException("카카오 ID가 일치하지 않습니다.");
+                }
+            }
+            else{
+                log.info("존재하지 않는 카카오 회원입니다.");
+                return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                        .isMembered(false)
+                        .build();
+            }
         }
-        else{
-            log.info("존재하지 않는 회원입니다.");
-            return OAuth2Dto.OAuth2CheckResponseDto.builder()
-                    .isMembered(false)
-                    .build();
+        else if(requestDto.getProvider().equals("google")){
+            String email = requestDto.getEmail();
+            String provider = requestDto.getProvider();
+
+            Optional<User> user = userRepository.findByEmailAndProvider(email, provider);
+            log.info("google repository에서 찾은 후");
+
+            if(user.isPresent()){
+                String checkedGoogleEmail = oauth2Service.getUserInfo(provider, accessToken);
+                if(email.equals(checkedGoogleEmail)){
+                    log.info("기존에 존재하는 구글 회원입니다.");
+                    return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                            .isMembered(true)
+                            .build();
+                }
+                else {
+                    throw new IllegalArgumentException("구글 이메일이 일치하지 않습니다.");
+                }
+            }
+            else{
+                log.info("존재하지 않는 구글 회원입니다.");
+                return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                        .isMembered(false)
+                        .build();
+            }
         }
+        else if(requestDto.getProvider().equals("naver")){
+            String naverId = requestDto.getNaverId();
+            String provider = requestDto.getProvider();
+
+            Optional<User> user = userRepository.findByNaverIdAndProvider(naverId, provider);
+            log.info("naver repository에서 찾은 후");
+            log.info("checkedEmail: " + naverId);
+
+            if(user.isPresent()){
+                String checkedNaverEmail = oauth2Service.getUserInfo(provider, accessToken);
+                if(naverId.equals(checkedNaverEmail)){
+                    log.info("기존에 존재하는 네이버 회원입니다.");
+                    return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                            .isMembered(true)
+                            .build();
+                }
+                else {
+                    throw new IllegalArgumentException("네이버 이메일이 일치하지 않습니다.");
+                }
+            }
+            else{
+                log.info("존재하지 않는 네이버 회원입니다.");
+                return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                        .isMembered(false)
+                        .build();
+            }
+        }
+        return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                .isMembered(false)
+                .build();
     }
 
-    public OAuth2Dto.OAuth2ResponseDto socialLoginForSignUp(OAuth2Dto.OAuth2SignUpRequestDto requestDto){
+    public OAuth2Dto.OAuth2ResponseDto socialLoginForSignUp(OAuth2Dto.OAuth2SignUpRequestDto requestDto, String accessToken){
         log.info("처음 로그인한 회원임으로 회원가입을 진행합니다. ");
+        String emailforcheck = requestDto.getEmail();
+        if(userRepository.existsByEmail(emailforcheck)){
+            throw new UserException(UserErrorResult.DUPLICATED_EMAIL);
+        }
 
-        User newUser = User.builder()
-                .uuid(UUID.randomUUID())
-                .provider(requestDto.getProvider())
-                .nickname(requestDto.getNickname())
-                .originalNickname(requestDto.getOriginalNickname())
-                .email(requestDto.getEmail())
-                .role(Role.USER)
-                .gender(requestDto.getGender())
-                .birthday(requestDto.getBirthday())
-                .build();
+        if(requestDto.getProvider().equals("kakao")){
+            String kakaoId = requestDto.getKakaoId();
+            String provider = requestDto.getProvider();
 
-        User socialUser = userRepository.save(newUser);
+            String checkedKakaoId = oauth2Service.getUserInfo(provider, accessToken);
+            if(kakaoId.equals(checkedKakaoId)) {
+                log.info("유효한 kakao 토큰입니다.");
+
+                User newUser = User.builder()
+                        .uuid(UUID.randomUUID())
+                        .provider(requestDto.getProvider())
+                        .nickname(requestDto.getNickname())
+                        .kakaoId(checkedKakaoId)
+                        .email(requestDto.getEmail())
+                        .role(Role.USER)
+                        .gender(requestDto.getGender())
+                        .birthday(requestDto.getBirthday())
+                        .build();
+
+                User socialUser = userRepository.save(newUser);
+
+                return OAuth2Dto.OAuth2ResponseDto.builder()
+                        .userId(socialUser.getUuid())
+                        .provider(socialUser.getProvider())
+                        .createdAt(socialUser.getCreatedAt())
+                        .build();
+            }else {
+                throw new IllegalArgumentException("유효하지 않은 kakao 토큰입니다.");
+            }
+
+        }
+        else if(requestDto.getProvider().equals("google")){
+            String email = requestDto.getEmail();
+            String provider = requestDto.getProvider();
+
+            String checkedNaverId = oauth2Service.getUserInfo(provider, accessToken);
+            if(email.equals(checkedNaverId)) {
+                log.info("유효한 google 토큰입니다.");
+
+                User newUser = User.builder()
+                        .uuid(UUID.randomUUID())
+                        .provider(requestDto.getProvider())
+                        .nickname(requestDto.getNickname())
+                        .email(requestDto.getEmail())
+                        .role(Role.USER)
+                        .gender(requestDto.getGender())
+                        .birthday(requestDto.getBirthday())
+                        .build();
+
+                User socialUser = userRepository.save(newUser);
+
+                return OAuth2Dto.OAuth2ResponseDto.builder()
+                        .userId(socialUser.getUuid())
+                        .provider(socialUser.getProvider())
+                        .createdAt(socialUser.getCreatedAt())
+                        .build();
+            }else {
+                throw new IllegalArgumentException("유효하지 않은 google 토큰입니다.");
+            }
+        }
+        else if(requestDto.getProvider().equals("naver")){
+            String naverId = requestDto.getNaverid();
+            String provider = requestDto.getProvider();
+
+            String checkedEmail = oauth2Service.getUserInfo(provider, accessToken);
+
+            if(naverId.equals(checkedEmail)) {
+                log.info("유효한 naver 토큰입니다.");
+
+                User newUser = User.builder()
+                        .uuid(UUID.randomUUID())
+                        .provider(requestDto.getProvider())
+                        .nickname(requestDto.getNickname())
+                        .naverId(checkedEmail)
+                        .email(requestDto.getEmail())
+                        .role(Role.USER)
+                        .gender(requestDto.getGender())
+                        .birthday(requestDto.getBirthday())
+                        .build();
+
+                User socialUser = userRepository.save(newUser);
+
+                return OAuth2Dto.OAuth2ResponseDto.builder()
+                        .userId(socialUser.getUuid())
+                        .provider(socialUser.getProvider())
+                        .createdAt(socialUser.getCreatedAt())
+                        .build();
+            }else {
+                throw new IllegalArgumentException("유효하지 않은 naver 토큰입니다.");
+            }
+        }
 
         return OAuth2Dto.OAuth2ResponseDto.builder()
-                .userId(socialUser.getUuid())
-                .provider(socialUser.getProvider())
-                .createdAt(socialUser.getCreatedAt())
+                .userId(null)
+                .provider(null)
+                .createdAt(null)
                 .build();
     }
 
