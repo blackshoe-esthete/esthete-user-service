@@ -20,6 +20,93 @@ public class Oauth2Service {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+//    /**
+//     * 네이버 사용자 정보 조회
+//     * @param accessToken
+//     * @return 사용자 정보
+//     */
+//    public String getNaverUserInfo(String accessToken) {
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Authorization", "Bearer " + accessToken);
+//        HttpEntity<String> entity = new HttpEntity<>(headers);
+//
+//        try {
+//            ResponseEntity<String> response = restTemplate.exchange(NAVER_USER_INFO_URL, HttpMethod.GET, entity, String.class);
+//            if (response.getStatusCode().is2xxSuccessful()) {
+//                JSONObject userInfo = new JSONObject(response.getBody());
+//                JSONObject responseObject = userInfo.getJSONObject("response");
+//                return responseObject.getString("email");
+//            } else {
+//                return null;
+//            }
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
+//
+//    /**
+//     * 카카오 사용자 정보 조회
+//     * @param accessToken
+//     * @return 사용자 정보
+//     */
+//    public String getKakaoUserInfo(String accessToken) {
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Authorization", "Bearer " + accessToken);
+//        HttpEntity<String> entity = new HttpEntity<>(headers);
+//
+//        try {
+//            ResponseEntity<String> response = restTemplate.exchange(KAKAO_USER_INFO_URL, HttpMethod.GET, entity, String.class);
+//            if (response.getStatusCode().is2xxSuccessful()) {
+//                JSONObject userInfo = new JSONObject(response.getBody());
+//                return userInfo.getString("id");
+//            } else {
+//                return null;
+//            }
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
+//
+//    /**
+//     * 구글 사용자 정보 조회 (id_token 디코딩)
+//     * @param idToken
+//     * @return 사용자 정보
+//     */
+//    public String getGoogleUserInfo(String idToken) {
+//        String url = GOOGLE_TOKEN_VALIDATION_URL + idToken;
+//
+//        try {
+//            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+//            if (response.getStatusCode().is2xxSuccessful()) {
+//                JSONObject userInfo = new JSONObject(response.getBody());
+//                return userInfo.getString("email");
+//            } else {
+//                return null;
+//            }
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
+//
+//    /**
+//     * 통합 사용자 정보 조회 메서드
+//     * @param provider 소셜 제공자 (google, naver, kakao)
+//     * @param token 해당 플랫폼의 액세스 또는 id 토큰
+//     * @return 사용자 정보
+//     */
+//    public String getUserInfo(String provider, String token) {
+//        switch (provider.toLowerCase()) {
+//            case "google":
+//                return getGoogleUserInfo(token);
+//            case "naver":
+//                return getNaverUserInfo(token);
+//            case "kakao":
+//                return getKakaoUserInfo(token);
+//            default:
+//                throw new IllegalArgumentException("Unknown provider: " + provider);
+//        }
+//    }
+
     /**
      * 네이버 사용자 정보 조회
      * @param accessToken
@@ -33,8 +120,10 @@ public class Oauth2Service {
         try {
             ResponseEntity<String> response = restTemplate.exchange(NAVER_USER_INFO_URL, HttpMethod.GET, entity, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
-                JSONObject userInfo = new JSONObject(response.getBody());
-                return userInfo.toString();  // 사용자 정보를 반환
+                JSONObject responseJson = new JSONObject(response.getBody());
+//                return  responseJson.toString();
+                JSONObject userInfo = responseJson.getJSONObject("response");
+                return userInfo.get("id").toString();  // 네이버 id만 반환
             } else {
                 return null;
             }
@@ -57,7 +146,7 @@ public class Oauth2Service {
             ResponseEntity<String> response = restTemplate.exchange(KAKAO_USER_INFO_URL, HttpMethod.GET, entity, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
                 JSONObject userInfo = new JSONObject(response.getBody());
-                return userInfo.toString();  // 사용자 정보를 반환
+                return userInfo.get("id").toString();  // 카카오 id만 반환
             } else {
                 return null;
             }
@@ -78,7 +167,7 @@ public class Oauth2Service {
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
                 JSONObject userInfo = new JSONObject(response.getBody());
-                return userInfo.toString();  // 사용자 정보를 반환
+                return userInfo.get("email").toString();  // 구글 email만 반환
             } else {
                 return null;
             }
