@@ -48,6 +48,7 @@ public class OAuth2Dto {
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OAuth2CheckResponseDto{
+        private UUID userId;
         private boolean isMembered;
     }
 
