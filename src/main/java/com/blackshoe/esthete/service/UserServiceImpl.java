@@ -245,10 +245,12 @@ public class UserServiceImpl implements UserService{
             }
         }
         else if(requestDto.getProvider().equals("naver")){
-            String naverId = requestDto.getNaverid();
+            String naverId = requestDto.getNaverId();
+            log.info("naverId : " + naverId);
             String provider = requestDto.getProvider();
 
             String checkedEmail = oauth2Service.getUserInfo(provider, accessToken);
+            log.info("checkedEmail : " + checkedEmail);
 
             if(naverId.equals(checkedEmail)) {
                 log.info("유효한 naver 토큰입니다.");
