@@ -106,6 +106,7 @@ public class UserServiceImpl implements UserService{
                 if(kakaoId.equals(checkedKakaoId)){
                     log.info("기존에 존재하는 카카오 회원입니다.");
                     return OAuth2Dto.OAuth2CheckResponseDto.builder()
+                            .userId(kakaoUser.get().getUuid())
                             .isMembered(true)
                             .build();
                 }else {
@@ -205,6 +206,17 @@ public class UserServiceImpl implements UserService{
 
                 User socialUser = userRepository.save(newUser);
 
+                // kafka로 새로운 회원정보 넘겨주기
+                KafkaProducerDto.UserCreate userCreate = KafkaProducerDto.UserCreate.builder()
+                        .userId(socialUser.getUuid())
+                        .nickname(socialUser.getNickname())
+                        .email(socialUser.getEmail())
+                        .gender(socialUser.getGender())
+                        .birthday(socialUser.getBirthday())
+                        .build();
+
+                kafkaUserInfoProducerService.createUser(userCreate);
+
                 return OAuth2Dto.OAuth2ResponseDto.builder()
                         .userId(socialUser.getUuid())
                         .provider(socialUser.getProvider())
@@ -234,6 +246,17 @@ public class UserServiceImpl implements UserService{
                         .build();
 
                 User socialUser = userRepository.save(newUser);
+
+                // kafka로 새로운 회원정보 넘겨주기
+                KafkaProducerDto.UserCreate userCreate = KafkaProducerDto.UserCreate.builder()
+                        .userId(socialUser.getUuid())
+                        .nickname(socialUser.getNickname())
+                        .email(socialUser.getEmail())
+                        .gender(socialUser.getGender())
+                        .birthday(socialUser.getBirthday())
+                        .build();
+
+                kafkaUserInfoProducerService.createUser(userCreate);
 
                 return OAuth2Dto.OAuth2ResponseDto.builder()
                         .userId(socialUser.getUuid())
@@ -267,6 +290,17 @@ public class UserServiceImpl implements UserService{
                         .build();
 
                 User socialUser = userRepository.save(newUser);
+
+                // kafka로 새로운 회원정보 넘겨주기
+                KafkaProducerDto.UserCreate userCreate = KafkaProducerDto.UserCreate.builder()
+                        .userId(socialUser.getUuid())
+                        .nickname(socialUser.getNickname())
+                        .email(socialUser.getEmail())
+                        .gender(socialUser.getGender())
+                        .birthday(socialUser.getBirthday())
+                        .build();
+
+                kafkaUserInfoProducerService.createUser(userCreate);
 
                 return OAuth2Dto.OAuth2ResponseDto.builder()
                         .userId(socialUser.getUuid())
