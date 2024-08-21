@@ -239,6 +239,7 @@ public class UserController {
                                                             HttpServletResponse response){
         try{
 //            String subaccessToken = authorizationHeader.substring(7);
+            log.info("requestDto.getNaverId() : " + requestDto.getNaverId());
             OAuth2Dto.OAuth2ResponseDto oAuth2ResponseDto = userService.socialLoginForSignUp(requestDto, authorizationHeader);
             ResponseDto responseDto = ResponseDto.builder()
                     .payload(objectMapper.convertValue(oAuth2ResponseDto, Map.class))
