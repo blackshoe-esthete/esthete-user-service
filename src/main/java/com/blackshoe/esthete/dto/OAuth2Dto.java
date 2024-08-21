@@ -21,7 +21,7 @@ public class OAuth2Dto {
     public static class OAuth2SignUpRequestDto{
         private String provider;
         private String kakaoId;
-        private String naverid;
+        private String naverId;
         private String nickname;
         private String email;
         private Gender gender;
